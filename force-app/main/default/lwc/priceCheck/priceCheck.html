@@ -1,11 +1,44 @@
 <template>
-    <div class="searchGroup">
-        <lightning-input type="text" variant="standard" name="name" label="Search" placeholder="type here..."></lightning-input>
+    <div class="searchGroup slds-grid slds-gutters">
+        <div class="slds-col slds-size_4-of-5">
+            <div onkeyup={handleKeys}>
+                <lightning-input type="text" 
+                    variant="standard" 
+                    name="name" 
+                    label="Search" 
+                    placeholder="type here..."
+                    data-value="searchInput"></lightning-input>
+            </div>
+        </div> 
+            <div class="slds-col slds-size_1-of-5 slds-m-top_large">
+                <lightning-button variant="brand" label="Search" 
+                        title="search" onclick={handleSearch}></lightning-button>
+            </div>
     </div>
-    <div class="pinned">
-        <p>pinned cards go here</p>
-    </div>
-       <div class="card">{title}</div>
-       <div class="card">card 2</div>
-       <div class="card">card 3</div>
+    <template if:true={isPinned}>
+        <div class="pinned">
+            <p>pinned cards go here</p>
+        </div>
+    </template>
+    <template if:false={loaded}>
+        <div class="exampleHolder">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
+    <template if:true={loaded}>
+        <div class="slds-scrollable_y">
+                <lightning-layout multiple-rows="true">
+                    <template if:true={prod} for:each={prod} for:item="x" for:index="index">
+                        <lightning-layout-item key={x.Id} name={x.Id} class="card" size="12">
+                           <!-- Top Line -->
+                            <div class="slds-grid">
+                                <a href={x.url} target="_blank" class="searchLinks">{x.name}</a>
+                                <p>Stock Status: {x.stock}</p>
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+        </div>
+    </template>
+
 </template>
