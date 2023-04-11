@@ -2,7 +2,7 @@ import { LightningElement,track,api } from 'lwc';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 //import inCounts from '@salesforce/apex/cpqApex.inCounts';
-import {newInventory,allInventory} from 'c/helper' 
+import {newInventory,allInventory, roundNum} from 'c/helper' 
 
 export default class PriceCheck extends LightningElement {
     searchTerm;
@@ -49,6 +49,7 @@ export default class PriceCheck extends LightningElement {
                 let ProductCode;  
                 let url; 
                 let showPricing
+                let displayPrice;
                 this.prod = res.map(x=>{
                     name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
@@ -60,7 +61,8 @@ export default class PriceCheck extends LightningElement {
                     ProductCode = x.Product2.ProductCode,
                     url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
-                    return {...x, name, cost, flr, lev1, lev2, stock, allStock, ProductCode,url, showPricing}
+                    displayPrice = 0.00
+                    return {...x, name, cost, flr, lev1, lev2, stock, allStock, ProductCode,url, showPricing, displayPrice}
                 })
 
         }).then(()=>{
@@ -82,5 +84,15 @@ export default class PriceCheck extends LightningElement {
         let targId = evt.currentTarget.dataset.close
         let index = this.prod.findIndex(x=>x.Id === targId)
         this.prod[index].showPricing = false;
+    }
+    handleMargin(evt){
+        window.clearTimeout(this.delay)
+        let margin = Number(evt.target.value/100); 
+        let index = this.prod.findIndex(x=>x.Id === evt.target.name);
+        this.delay = setTimeout(()=>{
+            let cost = this.prod[index].cost; 
+            this.prod[index].displayPrice = roundNum(Number(cost/1-margin),2 )
+        },500)
+        
     }
 }

@@ -51,6 +51,17 @@
                                 <template lwc:if={x.showPricing}>
                                     <lightning-icon icon-name="utility:chevrondown" alternative-text="Connected" size="xx-small"
                                     title="xx-small size" onclick={closeInputs} data-close={x.Id}></lightning-icon>
+                                    <div class="slds-grid">
+                                        <lightning-input type="number"  
+                                                class="slds-col slds-size_2-of-8"
+                                                name={x.Id}
+                                                label="Sales Margin"
+                                                onchange={handleMargin}></lightning-input>
+                                        <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
+                                            <label>Sales Price</label>
+                                            <span>${x.displayPrice}</span>
+                                        </div>
+                                    </div>
                                 </template>
                                 <template lwc:else>
                                     <lightning-icon icon-name="utility:chevronright" alternative-text="Connected" size="xx-small"
