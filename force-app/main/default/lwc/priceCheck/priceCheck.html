@@ -29,11 +29,33 @@
         <div class="slds-scrollable_y">
                 <lightning-layout multiple-rows="true">
                     <template if:true={prod} for:each={prod} for:item="x" for:index="index">
-                        <lightning-layout-item key={x.Id} name={x.Id} class="card" size="12">
+                        <lightning-layout-item key={x.Id}  class="card" size="12">
                            <!-- Top Line -->
                             <div class="slds-grid">
-                                <a href={x.url} target="_blank" class="searchLinks">{x.name}</a>
-                                <p>Stock Status: {x.stock}</p>
+                                <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
+                                    <a href={x.url} target='_blank' class="searchLinks">
+                                        {x.name}
+                                    </a>
+                                </div>
+                                <div class="slds-col slds-size-1-of-4 ">
+                                    <span class="stockStatus">
+                                        Status: <b>{x.stock}</b>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-m-left_x-small">
+                                <p>cost: ${x.cost} level 1: ${x.lev1} level 2: ${x.lev2}</p>
+                            </div>
+<!-- Show pricing input tools -->
+                            <div class="chevron">
+                                <template lwc:if={x.showPricing}>
+                                    <lightning-icon icon-name="utility:chevrondown" alternative-text="Connected" size="xx-small"
+                                    title="xx-small size" onclick={closeInputs} data-close={x.Id}></lightning-icon>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-icon icon-name="utility:chevronright" alternative-text="Connected" size="xx-small"
+                                        title="xx-small size" onclick={openInputs} data-name={x.Id}></lightning-icon>
+                                </template>
                             </div>
                         </lightning-layout-item>
                     </template>

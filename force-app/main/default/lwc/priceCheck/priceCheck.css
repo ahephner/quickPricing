@@ -4,6 +4,7 @@
     height: 75px;
     border-radius: 5px;
     margin-top: 2px;
+    
 }
 .pinned{
     margin-bottom: 3px;
@@ -21,4 +22,12 @@
 
 .searchLinks{
     font-size: 12px;
+}
+
+.stockStatus{
+    font-size: 10px;
+}
+
+.chevron{
+    cursor: pointer;
 }

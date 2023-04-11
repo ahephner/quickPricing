@@ -29,7 +29,7 @@ export default class PriceCheck extends LightningElement {
             this.handleSearch();
         }
     }
-
+    
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
         if(this.searchTerm.length<3){
@@ -48,6 +48,7 @@ export default class PriceCheck extends LightningElement {
                 let allStock;
                 let ProductCode;  
                 let url; 
+                let showPricing
                 this.prod = res.map(x=>{
                     name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
@@ -58,7 +59,8 @@ export default class PriceCheck extends LightningElement {
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
                     url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
-                    return {...x, name, cost, flr, lev1, lev2, stock, allStock, ProductCode,url}
+                    showPricing = false; 
+                    return {...x, name, cost, flr, lev1, lev2, stock, allStock, ProductCode,url, showPricing}
                 })
 
         }).then(()=>{
@@ -66,8 +68,19 @@ export default class PriceCheck extends LightningElement {
             this.searchTerm = ''; 
             let x = this.template.querySelector('lightning-input').value;
             x = ''; 
-            console.log(JSON.stringify(this.prod));
+            //console.log(JSON.stringify(this.prod));
             
         })
+    }
+ 
+    openInputs(evt){
+        let targId = evt.currentTarget.dataset.name
+        let index = this.prod.findIndex(x=>x.Id === targId)
+        this.prod[index].showPricing = true;
+    }
+    closeInputs(evt){
+        let targId = evt.currentTarget.dataset.close
+        let index = this.prod.findIndex(x=>x.Id === targId)
+        this.prod[index].showPricing = false;
     }
 }
