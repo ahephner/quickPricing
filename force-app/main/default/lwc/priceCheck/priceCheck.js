@@ -44,6 +44,7 @@ export default class PriceCheck extends LightningElement {
                 let flr;
                 let lev1;
                 let lev2;
+                let slug; 
                 let stock;
                 let allStock;
                 let ProductCode;  
@@ -56,13 +57,14 @@ export default class PriceCheck extends LightningElement {
                     flr = x.Floor_Price__c,
                     lev1 = x.Level_1_UserView__c,
                     lev2 = x.Level_2_UserView__c,
+                    slug = `cost $${cost}  flr $${flr}-${x.Floor_Margin__c}%   Level 1 $${lev1}`
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
                     url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
                     displayPrice = 0.00
-                    return {...x, name, cost, flr, lev1, lev2, stock, allStock, ProductCode,url, showPricing, displayPrice}
+                    return {...x, name, cost, flr, lev1, lev2, slug, stock, allStock, ProductCode,url, showPricing, displayPrice}
                 })
 
         }).then(()=>{
@@ -85,14 +87,38 @@ export default class PriceCheck extends LightningElement {
         let index = this.prod.findIndex(x=>x.Id === targId)
         this.prod[index].showPricing = false;
     }
+    
     handleMargin(evt){
         window.clearTimeout(this.delay)
-        let margin = Number(evt.target.value/100); 
+        let margin = Number(evt.target.value)/100; 
         let index = this.prod.findIndex(x=>x.Id === evt.target.name);
         this.delay = setTimeout(()=>{
-            let cost = this.prod[index].cost; 
-            this.prod[index].displayPrice = roundNum(Number(cost/1-margin),2 )
+            let cost = this.prod[index].cost;
+            
+            this.prod[index].displayPrice = roundNum((cost/(1- margin)), 2 )
         },500)
+        
+    }
+
+    pinCard(evt){
+        let x = this.prod.find((y)=> y.Id === evt.currentTarget.dataset.pin);
+        console.log(x)
+        this.pinnedCards = [...this.pinnedCards, x]
+        this.isPinned = true; 
+    }
+    unPinCard(evt){
+        let index = this.pinnedCards.findIndex(y=> y.Id === evt.currentTarget.dataset.unpin);
+        console.log(1, index, 2, evt.currentTarget.dataset.unpin)
+        this.pinnedCards.splice(index,1);
+        this.isPinned = this.pinnedCards.length > 0 ? true : false;
+    }
+    addCard(){
+        console.log('adding ');
+        
+    }
+
+    checkInv(){
+        console.log('check inv');
         
     }
 }
