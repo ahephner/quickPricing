@@ -10,6 +10,7 @@ export default class PriceCheck extends LightningElement {
     loaded; 
     formSize;
     isPinned = false; 
+    showWarn = false; 
     @track pinnedCards = [];
     @track prod = [];
     
@@ -39,7 +40,7 @@ export default class PriceCheck extends LightningElement {
         this.loaded = false
         checkPrice({priceBookId: this.priceBook, searchKey: this.searchTerm})
         .then((res)=>{
-            let name;
+                let name;
                 let cost; 
                 let flr;
                 let lev1;
@@ -51,20 +52,23 @@ export default class PriceCheck extends LightningElement {
                 let url; 
                 let showPricing
                 let displayPrice;
+                let displayMargin; 
                 this.prod = res.map(x=>{
                     name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
                     flr = x.Floor_Price__c,
                     lev1 = x.Level_1_UserView__c,
                     lev2 = x.Level_2_UserView__c,
-                    slug = `cost $${cost}  flr $${flr}-${x.Floor_Margin__c}%   Level 1 $${lev1}`
+                    slug = x.Agency_Product__c ? `Agency - $${flr}`:`cost $${cost}  flr $${flr}-${x.Floor_Margin__c}%   Level 1 $${lev1}`
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
                     url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
-                    displayPrice = 0.00
-                    return {...x, name, cost, flr, lev1, lev2, slug, stock, allStock, ProductCode,url, showPricing, displayPrice}
+                    displayPrice = x.Level_2_UserView__c
+                    displayMargin = x.Level_2_Margin__c 
+
+                    return {...x, name, cost, flr, lev1, lev2, slug, stock, allStock, ProductCode,url, showPricing, displayPrice, displayMargin}
                 })
 
         }).then(()=>{
@@ -95,20 +99,30 @@ export default class PriceCheck extends LightningElement {
         this.delay = setTimeout(()=>{
             let cost = this.prod[index].cost;
             
-            this.prod[index].displayPrice = roundNum((cost/(1- margin)), 2 )
+            this.prod[index].displayPrice = roundNum((cost/(1- margin)), 2 );
+            this.prod[index].displayMargin = margin * 100; 
         },500)
         
     }
-
+    fadeWarn(){
+        this.showWarn = true;
+        window.clearTimeout(this.delay);
+        this.delay = setTimeout(()=>{
+            this.showWarn = false;
+        },1000)
+    }
     pinCard(evt){
         let x = this.prod.find((y)=> y.Id === evt.currentTarget.dataset.pin);
-        console.log(x)
-        this.pinnedCards = [...this.pinnedCards, x]
-        this.isPinned = true; 
+        if(this.pinnedCards.length<2){
+            this.pinnedCards = [...this.pinnedCards, x]
+            this.isPinned = true; 
+            this.prod.splice(this.prod.findIndex(a=>a.Id ===x.Id), 1)
+        }else{
+            this.fadeWarn();
+        }
     }
     unPinCard(evt){
         let index = this.pinnedCards.findIndex(y=> y.Id === evt.currentTarget.dataset.unpin);
-        console.log(1, index, 2, evt.currentTarget.dataset.unpin)
         this.pinnedCards.splice(index,1);
         this.isPinned = this.pinnedCards.length > 0 ? true : false;
     }

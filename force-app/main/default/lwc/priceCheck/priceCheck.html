@@ -14,7 +14,12 @@
                 <lightning-button variant="brand" label="Search" 
                         title="search" onclick={handleSearch}></lightning-button>
             </div>
-    </div>
+        </div>
+        <template if:true={showWarn}>
+            <div class="showWarn">
+                <p>You can only pin 2 items at a time</p>
+            </div>
+        </template>
     <template if:true={isPinned}>
         <lightning-layout multiple-rows="true">
         <template if:true={pinnedCards} for:each={pinnedCards} for:item="y" for:index="index">
@@ -23,12 +28,12 @@
                            <div class="slds-grid">
                             <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
                                 <a href={y.url} target='_blank' class="searchLinks">
-                                    {y.Id}
+                                    {y.name}
                                 </a>
                             </div>
                             <div class="slds-col slds-size-1-of-4 ">
                                 <span class="stockStatus">
-                                    Status: <b>{y.name}</b>
+                                    Status: <b>{y.stock}</b>
                                 </span>
                             </div>
                         </div>
@@ -49,19 +54,20 @@
                                                 class="slds-col slds-size_2-of-8"
                                                 name={y.Id}
                                                 label="Sales Margin"
+                                                value={y.displayMargin}
                                                 onchange={handleMargin}></lightning-input>
                                         <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
                                             <label>Sales Price</label>
                                             <span>${y.displayPrice}</span>
                                         </div>
                                         
+                                    </template>
                                             <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large">
                                                 <lightning-button label="UnPin" variant="destructive" onclick={unPinCard}  data-unpin={y.Id}></lightning-button>
                                                 <lightning-button label="Cart" variant="brand" onclick={addOrder}  data-cart={y.Id}></lightning-button>
                                                 <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={y.Id}></lightning-button>
                                             </lightning-button-group>
                                         
-                                    </template>
                                 </div>
                             </template>
                             <template lwc:else>
@@ -114,11 +120,13 @@
                                                     class="slds-col slds-size_2-of-8"
                                                     name={x.Id}
                                                     label="Sales Margin"
+                                                    value={x.displayMargin}
                                                     onchange={handleMargin}></lightning-input>
                                             <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
                                                 <label>Sales Price</label>
                                                 <span>${x.displayPrice}</span>
                                             </div>
+                                        </template>
                                             
                                                 <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large">
                                                     <lightning-button label="Pin" variant="destructive" onclick={pinCard}  data-pin={x.Id}></lightning-button>
@@ -126,7 +134,6 @@
                                                     <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={x.Id}></lightning-button>
                                                 </lightning-button-group>
                                             
-                                        </template>
                                     </div>
                                 </template>
                                 <template lwc:else>

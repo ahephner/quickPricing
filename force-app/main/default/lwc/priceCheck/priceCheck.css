@@ -35,3 +35,10 @@
 .salesPrice{
     display: inline-grid; 
 }
+
+.showWarn{
+    color: rgb(153, 0, 0);
+    text-align: center;
+    position: relative;
+    top: -9px;
+}
