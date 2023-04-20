@@ -11,8 +11,11 @@ export default class PriceCheck extends LightningElement {
     formSize;
     isPinned = false; 
     showWarn = false; 
+    demoMode = false; 
+    demoLabel = 'Normal'
     @track pinnedCards = [];
     @track prod = [];
+    @track tagCards = []; 
     
     connectedCallback(){ 
         this.formSize = this.screenSize(FORM_FACTOR);
@@ -30,7 +33,7 @@ export default class PriceCheck extends LightningElement {
             this.handleSearch();
         }
     }
-    
+
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
         if(this.searchTerm.length<3){

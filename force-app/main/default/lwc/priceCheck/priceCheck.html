@@ -1,6 +1,6 @@
 <template>
     <div class="searchGroup slds-grid slds-gutters">
-        <div class="slds-col slds-size_4-of-5">
+        <div class="slds-col slds-size_3-of-6">
             <div onkeyup={handleKeys}>
                 <lightning-input type="text" 
                     variant="standard" 
@@ -10,9 +10,11 @@
                     data-value="searchInput"></lightning-input>
             </div>
         </div> 
-            <div class="slds-col slds-size_1-of-5 slds-m-top_large">
+            <div class="slds-col slds-size_3-of-6 slds-m-top_large">
                 <lightning-button variant="brand" label="Search" 
                         title="search" onclick={handleSearch}></lightning-button>
+                <lightning-button variant="success" label='Inv'
+                        title='check Inv' onclick={checkInv}></lightning-button>
             </div>
         </div>
         <template if:true={showWarn}>
@@ -85,6 +87,7 @@
             <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
     </template>
+    <template if:false={demoMode}>
     <template if:true={loaded}>
         <div class="slds-scrollable_y">
                 <lightning-layout multiple-rows="true">
@@ -130,8 +133,8 @@
                                             
                                                 <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large">
                                                     <lightning-button label="Pin" variant="destructive" onclick={pinCard}  data-pin={x.Id}></lightning-button>
-                                                    <lightning-button label="Cart" variant="brand" onclick={addOrder}  data-cart={x.Id}></lightning-button>
-                                                    <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={x.Id}></lightning-button>
+                                                    <!-- <lightning-button label="Cart" variant="brand" onclick={addOrder}  data-cart={x.Id}></lightning-button>
+                                                    <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={x.Id}></lightning-button> -->
                                                 </lightning-button-group>
                                             
                                     </div>
@@ -146,5 +149,6 @@
                 </lightning-layout>
         </div>
     </template>
+</template>
 
 </template>
