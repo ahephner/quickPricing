@@ -24,6 +24,11 @@ export default class TagContainer extends LightningElement {
             this.searchTwo(); 
         }
     }
+
+    handleSearch(e){
+        e.preventDefault();
+        this.searchTwo(); 
+    }
     searchTwo(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
         if(this.searchTerm.length<3){
@@ -48,5 +53,9 @@ export default class TagContainer extends LightningElement {
             
             this.loaded = true; 
         })
+    }
+    
+    handleInv(){
+        alert('hey')
     }
 }
