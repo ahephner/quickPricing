@@ -43,3 +43,8 @@
     position: relative;
     top: -9px;
 }
+
+.btnPin{
+    margin-left: 275%;
+    margin-bottom: 5%; 
+}

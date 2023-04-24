@@ -1,19 +1,31 @@
 <template>
     <div class="searchGroup slds-grid slds-gutters">
         <div class="slds-col slds-size_3-of-6">
-            <div onkeyup={handleKeys}>
-                <lightning-input type="text" 
-                    variant="standard" 
-                    name="name" 
-                    label="Search" 
-                    placeholder="type here..."
-                    data-value="searchInput"></lightning-input>
-            </div>
+            <template if:false={showInventory}>
+                <div onkeyup={handleKeys}>
+                    <lightning-input type="text" 
+                        variant="standard" 
+                        name="name" 
+                        label="Search" 
+                        placeholder="type here..."
+                        data-value="searchInput"></lightning-input>
+                </div>
+            </template>
+            <template if:true={showInventory}>
+                <lightning-combobox
+                name="warehouse"
+                label="Warehouse"
+                value={warehouse}
+                options={warehouseOptions}
+                onchange={checkInventory} ></lightning-combobox>
+            </template>
         </div> 
             <div class="slds-col slds-size_3-of-6 slds-m-top_large">
-                <lightning-button variant="brand" label="Search" 
-                        title="search" onclick={handleSearch}></lightning-button>
-                <lightning-button variant="success" label='Inv'
+                <template if:false={showInventory}>
+                    <lightning-button variant="brand" label="Search" 
+                            title="search" onclick={handleSearch}></lightning-button>
+                </template>
+                <lightning-button variant="success" label={btnLabel}
                         title='check Inv' onclick={checkInv}></lightning-button>
             </div>
         </div>
@@ -111,6 +123,7 @@
                             </div>
 <!-- Show pricing input tools -->
                             <div class="chevron">
+                                <template if:false={showInventory}>
                                 <template lwc:if={x.showPricing}>
                                     <lightning-icon icon-name="utility:chevrondown" alternative-text="Connected" size="xx-small"
                                     title="xx-small size" onclick={closeInputs} data-close={x.Id}></lightning-icon>
@@ -143,6 +156,19 @@
                                     <lightning-icon icon-name="utility:chevronright" alternative-text="Connected" size="xx-small"
                                         title="xx-small size" onclick={openInputs} data-name={x.Id}></lightning-icon>
                                 </template>
+                            </template>
+                            <template if:true={showPricing}>
+                                <div class="slds-col slds-size_1-of-3 slds-m-left_x-small">
+                                    <span class="numb">
+                                        All Company QTY: {x.allStock}
+                                    </span>
+                                </div>
+                                <div class="slds-m-left_small slds-size_1-of-3">
+                                    <span class="numb">
+                                        Qty Avail.: {x.wInv}
+                                    </span>
+                                </div>
+                            </template>
                             </div>
                         </lightning-layout-item>
                     </template>
