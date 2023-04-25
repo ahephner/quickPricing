@@ -1,56 +1,41 @@
 <template>
-    <!-- <template if:true={formSize}>
-        <div class="searchGroup slds-grid slds-gutters">
-            <div class="slds-col slds-size_3-of-6">
-                <template if:false={showInventory}>
-                    <div onkeyup={handleKeys}>
-                        <lightning-input type="text" 
-                            variant="standard" 
-                            name="name" 
-                            label="Search" 
-                            placeholder="type here..."
-                            data-value="searchInput"></lightning-input>
-                    </div>
-                </template>
-                <template if:true={showInventory}>
-                    <lightning-combobox
-                    name="warehouse"
-                    label="Warehouse"
-                    value={warehouse}
-                    options={warehouseOptions}
-                    onchange={checkInventory} ></lightning-combobox>
-                </template>
-            </div> 
-                <div class="slds-col slds-size_3-of-6 slds-m-top_large">
-                    <template if:false={showInventory}>
-                        <lightning-button variant="brand" label="Search" 
-                                title="search" onclick={handleSearch}></lightning-button>
-                    </template>
-                    <lightning-button variant="success" label={btnLabel}
-                            title='check Inv' onclick={checkInv}></lightning-button>
-                </div>
-            </div>
-    </template> -->
-<!-- MOBILE SEARCH GROUP -->
-    <!-- <template if:false={formSize}> -->
+    <div class="main">
         <div class="slds-grid slds-wrap">
             <template if:false={showInventory}>
-                <div class="slds-col slds-size_10-of-12">
-                    <div onkeyup={handleKeys}>
-                        <lightning-input type="text" 
-                            variant="standard" 
-                            name="name" 
-                            label="Search" 
-                            placeholder="type here..."
-                            data-value="searchInput"></lightning-input>
+                <template if:true={formSize}>
+                    <div class="slds-col slds-size_10-of-12">
+                        <div onkeyup={handleKeys}>
+                            <lightning-input type="text" 
+                                variant="standard" 
+                                name="name" 
+                                label="Search" 
+                                placeholder="type here..."
+                                data-value="searchInput"></lightning-input>
+                        </div>
                     </div>
-                </div>
-                <div class="slds-col slds-size_1-of-12 slds-m-top_large searchBtn">
-                    <lightning-button variant="brand" label="Search" 
-                    title="search" onclick={handleSearch}></lightning-button>
-                </div>
+                    <div class="slds-col slds-size_1-of-12 slds-m-top_large searchBtn">
+                        <lightning-button variant="brand" label="Search" 
+                        title="search" onclick={handleSearch}></lightning-button>
+                    </div>
+                </template>
+                <template if:false={formSize}>
+                    <div class="slds-col slds-size_9-of-12">
+                        <div onkeyup={handleKeys}>
+                            <lightning-input type="text" 
+                                variant="standard" 
+                                name="name" 
+                                label="Search" 
+                                placeholder="type here..."
+                                data-value="searchInput"></lightning-input>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-12 slds-m-top_large mobileSearchBtn">
+                        <lightning-button variant="brand" label="Search" 
+                        title="search" onclick={handleSearch}></lightning-button>
+                    </div>
+                </template>
             </template>
-            <!-- SEARCH INVENTORY -->
+<!-- SEARCH INVENTORY -->
     <template if:true={showInventory}>
         <div class="slds-col slds-size_1-of-1">
             <lightning-combobox
@@ -63,15 +48,15 @@
     </template>
     <div class="slds-col slds-size_1-of-1 slds-m-top_x-small slds-m-bottom_x-small">
         <lightning-input data-id="toggle" type="toggle" 
-                        label="Check Inventory" checked={showInventory} onchange={checkInv}
+                        label={btnLabel} checked={showInventory} onchange={checkInv}
                         message-toggle-active="" message-toggle-inactive=""></lightning-input>
     </div>
         </div>
-    <!-- </template> -->
 <!-- END OF SEARCH GROUPS -->
+<!-- START PIN FEATURE -->
         <template if:true={showWarn}>
             <div class="showWarn">
-                <p>You can only pin 2 items at a time</p>
+                <p>You can only pin 1 items at a time</p>
             </div>
         </template>
     <template if:true={isPinned}>
@@ -91,14 +76,15 @@
                                 </span>
                             </div>
                         </div>
-                        <!-- <div class="slds-grid slds-m-left_x-small">
-                            <p>{x.slug} </p>
-                        </div> -->
+                        <div class="slds-grid slds-m-left_x-small">
+                            <p>{y.slug} </p>
+                        </div> 
 <!-- Show pricing input tools -->
                         <div class="chevron">
-                            <template lwc:if={y.showPricing}>
+                            <template if:false={showInventory}>
+                            <template if:true={y.showPricing}>
                                 <lightning-icon icon-name="utility:chevrondown" alternative-text="Connected" size="xx-small"
-                                title="xx-small size" onclick={closeInputs} data-close={y.Id}></lightning-icon>
+                                title="xx-small size" onclick={pinInputs}></lightning-icon>
                                 <div class="slds-grid">
                                     <template lwc:if={y.Agency_Product__c}>
                                         <span class="slds-col slds-size_4-of-8"></span>
@@ -109,7 +95,7 @@
                                                 name={y.Id}
                                                 label="Sales Margin"
                                                 value={y.displayMargin}
-                                                onchange={handleMargin}></lightning-input>
+                                                onchange={handlePinMargin}></lightning-input>
                                         <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
                                             <label>Sales Price</label>
                                             <span>${y.displayPrice}</span>
@@ -124,9 +110,15 @@
                                         
                                 </div>
                             </template>
-                            <template lwc:else>
+                        </template>
+                        <template if:true={showInventory}>
+                            <div class="slds-col slds-m-left_x-small slds-m-top_small">
+                                <p>All Company QTY: {y.allStock} - Qty Avail.: {y.wInv}</p>
+                            </div>
+                        </template>
+                            <template if:false={y.showPricing}>
                                 <lightning-icon icon-name="utility:chevronright" alternative-text="Connected" size="xx-small"
-                                    title="xx-small size" onclick={openInputs} data-name={x.Id}></lightning-icon>
+                                    title="xx-small size" onclick={pinInputs} ></lightning-icon>
                             </template>
                         </div>
             </lightning-layout-item>
@@ -134,14 +126,16 @@
     </lightning-layout>
 
     </template>
+<!-- END PIN -->
+<!-- LOADING SPINNER -->
     <template if:false={loaded}>
         <div class="exampleHolder">
             <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
     </template>
-  
+<!--START SHOW RESULTS  -->
     <template if:true={loaded}>
-        <div class="slds-scrollable_y">
+        <div class="slds-scrollable_y resSize">
                 <lightning-layout multiple-rows="true">
                     <template if:true={prod} for:each={prod} for:item="x" for:index="index">
                         <lightning-layout-item key={x.Id}  class="card" size="12">
@@ -198,15 +192,8 @@
                                 </template>
                             </template>
                             <template if:true={showInventory}>
-                                <div class="slds-col slds-size_1-of-3 slds-m-left_x-small">
-                                    <span class="numb">
-                                        All Company QTY: {x.allStock}
-                                    </span>
-                                </div>
-                                <div class="slds-m-left_small slds-size_1-of-3">
-                                    <span class="numb">
-                                        Qty Avail.: {x.wInv}
-                                    </span>
+                                <div class="slds-col slds-m-left_x-small slds-m-top_small">
+                                    <p>All Company QTY: {x.allStock} - Qty Avail.: {x.wInv}</p>
                                 </div>
                             </template>
                             </div>
@@ -216,5 +203,5 @@
         </div>
     </template>
 
-
+</div>
 </template>

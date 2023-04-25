@@ -1,3 +1,6 @@
+.main{
+    height: 100%;
+}
 .card{
     border: 1px solid rgba(131, 130, 130, 0.214);
     width:100%;
@@ -15,8 +18,15 @@
     margin-top: 2px;
 }
 
+.resSize{
+    height: 365px; 
+}
 .searchBtn{
     margin-left:1%; 
+}
+.mobileSearchBtn{
+    margin-top: 2rem;
+    margin-left: 1%
 }
 .searchGroup{
     width:100%;

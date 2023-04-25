@@ -3,7 +3,7 @@ import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 import inCounts from '@salesforce/apex/cpqApex.inCounts';
 import {newInventory,allInventory, roundNum} from 'c/helper' 
-
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class PriceCheck extends LightningElement {
     searchTerm;
     priceBook = '01s410000077vSKAAY';
@@ -11,12 +11,13 @@ export default class PriceCheck extends LightningElement {
     formSize;
     isPinned = false; 
     showWarn = false; 
-    btnLabel = 'Inventory';
+    btnLabel = 'Check Inventory';
     showInventory = false; 
     warehouse; 
+    error; 
     @track pinnedCards = [];
     @track prod = [];
-    @track tagCards = []; 
+
     
     connectedCallback(){ 
         this.formSize = this.screenSize(FORM_FACTOR);
@@ -95,7 +96,15 @@ export default class PriceCheck extends LightningElement {
         let index = this.prod.findIndex(x=>x.Id === targId)
         this.prod[index].showPricing = false;
     }
-    
+    pinInputs(){
+        if(!this.pinnedCards[0].showPricing){
+            this.pinnedCards[0].showPricing = true;
+        }else{
+            this.pinnedCards[0].showPricing = false;
+
+        }
+    }
+
     handleMargin(evt){
         window.clearTimeout(this.delay)
         let margin = Number(evt.target.value)/100; 
@@ -108,16 +117,27 @@ export default class PriceCheck extends LightningElement {
         },500)
         
     }
+    handlePinMargin(evt){
+        window.clearTimeout(this.delay)
+        let margin = Number(evt.target.value)/100; 
+        let index = this.pinnedCards.findIndex(x=>x.Id === evt.target.name);
+        this.delay = setTimeout(()=>{
+            let cost = this.pinnedCards[index].cost;
+            
+            this.pinnedCards[index].displayPrice = roundNum((cost/(1- margin)), 2 );
+            this.pinnedCards[index].displayMargin = margin * 100; 
+        },500)
+    }
     fadeWarn(){
         this.showWarn = true;
         window.clearTimeout(this.delay);
         this.delay = setTimeout(()=>{
             this.showWarn = false;
-        },1000)
+        },1250)
     }
     pinCard(evt){
         let x = this.prod.find((y)=> y.Id === evt.currentTarget.dataset.pin);
-        if(this.pinnedCards.length<2){
+        if(this.pinnedCards.length<1){
             this.pinnedCards = [...this.pinnedCards, x]
             this.isPinned = true; 
             this.prod.splice(this.prod.findIndex(a=>a.Id ===x.Id), 1)
@@ -130,22 +150,21 @@ export default class PriceCheck extends LightningElement {
         this.pinnedCards.splice(index,1);
         this.isPinned = this.pinnedCards.length > 0 ? true : false;
     }
-    addCard(){
-        console.log('adding ');
-        
-    }
-
 //Invetory Section
-    checkInv(){
+    checkInv(event){
+        event.preventDefault();
         if(this.prod.length<1){
             alert('must have found at least 1 product');
+            
+            event.target.checked = false;
             return; 
         }
         if(!this.showInventory){ 
             this.showInventory = true; 
-            this.btnLabel = 'Back to Products';
+            this.btnLabel = 'Check Pricing';
         }else{ 
             this.showInventory = false;
+            this.warehouse = ''; 
             this.btnLabel = 'Check Inventory';
         }
         
@@ -187,7 +206,7 @@ export default class PriceCheck extends LightningElement {
     async checkInventory(locId){
         this.warehouse = locId.detail.value; 
         this.loaded = false;
-        let data = [...this.prod];
+        let data = this.isPinned = true ? [...this.prod, ...this.pinnedCards] : [...this.prod];
         let pcSet = new Set();
         let prodCodes = [];
         try{
@@ -197,12 +216,17 @@ export default class PriceCheck extends LightningElement {
             prodCodes = [...pcSet];
 
             let inCheck = await inCounts({pc:prodCodes, locId:this.warehouse});
-           console.log('inCheck ' +JSON.stringify(inCheck));
+           //console.log('inCheck ' +JSON.stringify(inCheck));
             this.prod = this.warehouse === 'All' ? await allInventory(data, inCheck) : await newInventory(data, inCheck);
-            //this will cause rerender to run so we can update the warning colors. 
-            //console.log('back')
-            console.log(JSON.stringify(this.prod)); 
+            let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';
+            this.prod.splice(this.prod.findIndex(a=>a.Id ===this.pinnedCards[0].Id), 1) 
+            this.pinnedCards[0].allStock = back?.allStock ?? 'not found'; 
+            this.pinnedCards[0].wInv = back?.wInv ?? 'not found'; 
+             
+            
+            //console.log(JSON.stringify(this.prod)); 
         }catch(error){
+            console.log(error)
             this.error = error;
             const evt = new ShowToastEvent({
                 title: 'Error loading inventory',
