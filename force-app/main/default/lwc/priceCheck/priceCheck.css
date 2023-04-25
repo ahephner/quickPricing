@@ -1,19 +1,33 @@
+.main{
+    height: 100%;
+}
 .card{
     border: 1px solid rgba(131, 130, 130, 0.214);
     width:100%;
-    height: 75px;
+    /* height: 65px; */
     border-radius: 5px;
     margin-top: 2px;
+    
 }
 .pinned{
     margin-bottom: 3px;
     border: 1px solid rgba(239, 137, 137, 0.877);
     width:100%;
-    height: 75px;
+    
     border-radius: 5px;
     margin-top: 2px;
 }
 
+.resSize{
+    height: 365px; 
+}
+.searchBtn{
+    margin-left:1%; 
+}
+.mobileSearchBtn{
+    margin-top: 2rem;
+    margin-left: 1%
+}
 .searchGroup{
     width:100%;
     height: 75px;
@@ -21,4 +35,28 @@
 
 .searchLinks{
     font-size: 12px;
+}
+
+.stockStatus{
+    font-size: 10px;
+}
+
+.chevron{
+    cursor: pointer;
+}
+
+.salesPrice{
+    display: inline-grid; 
+}
+
+.showWarn{
+    color: rgb(153, 0, 0);
+    text-align: center;
+    position: relative;
+    top: -9px;
+}
+
+.btnPin{
+    margin-left: 275%;
+    margin-bottom: 5%; 
 }
