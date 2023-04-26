@@ -98,11 +98,11 @@
                                                 onchange={handlePinMargin}></lightning-input>
                                         <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
                                             <label>Sales Price</label>
-                                            <span>${y.displayPrice}</span>
+                                            <span>{y.displayPrice}</span>
                                         </div>
                                         
                                     </template>
-                                            <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large">
+                                            <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large pinBtn">
                                                 <lightning-button label="UnPin" variant="destructive" onclick={unPinCard}  data-unpin={y.Id}></lightning-button>
                                                 <!-- <lightning-button label="Cart" variant="brand" onclick={addOrder}  data-cart={y.Id}></lightning-button>
                                                 <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={y.Id}></lightning-button> -->
@@ -174,11 +174,11 @@
                                                     onchange={handleMargin}></lightning-input>
                                             <div class="slds-col slds-size_2-of-8 slds-m-left_small slds-m-top_xx-small salesPrice">
                                                 <label>Sales Price</label>
-                                                <span>${x.displayPrice}</span>
+                                                <span>{x.displayPrice}</span>
                                             </div>
                                         </template>
                                             
-                                                <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large">
+                                                <lightning-button-group class="slds-col slds-size_4-of-8 slds-m-top_large pinBtn">
                                                     <lightning-button label="Pin" variant="destructive" onclick={pinCard}  data-pin={x.Id}></lightning-button>
                                                     <!-- <lightning-button label="Cart" variant="brand" onclick={addOrder}  data-cart={x.Id}></lightning-button>
                                                     <lightning-button label="Inv" variant="success" onclick={checkInv}  data-inv={x.Id}></lightning-button> -->
