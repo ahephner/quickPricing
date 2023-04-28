@@ -107,25 +107,34 @@ export default class PriceCheck extends LightningElement {
 
     handleMargin(evt){
         window.clearTimeout(this.delay)
-        let margin = Number(evt.target.value)/100; 
+        let margin = Number(evt.target.value);
         let index = this.prod.findIndex(x=>x.Id === evt.target.name);
         this.delay = setTimeout(()=>{
             let cost = this.prod[index].cost;
-            
-            this.prod[index].displayPrice = roundNum((cost/(1- margin)), 2 );
-            this.prod[index].displayMargin = margin * 100; 
+            console.log(1,this.prod[index].Floor_Margin__c, 2,margin, 3,this.prod[index].Floor_Margin__c < margin )
+            if(this.prod[index].Floor_Margin__c > margin){
+                this.prod[index].displayPrice = 'below floor'
+                this.prod[index].displayMargin = margin;
+            }else{
+                this.prod[index].displayPrice = `$${roundNum((cost/(1- (margin)/100)), 2 )}`;
+                this.prod[index].displayMargin = margin; 
+            }
         },500)
         
     }
     handlePinMargin(evt){
         window.clearTimeout(this.delay)
-        let margin = Number(evt.target.value)/100; 
+        let margin = Number(evt.target.value);
         let index = this.pinnedCards.findIndex(x=>x.Id === evt.target.name);
         this.delay = setTimeout(()=>{
             let cost = this.pinnedCards[index].cost;
-            
-            this.pinnedCards[index].displayPrice = roundNum((cost/(1- margin)), 2 );
-            this.pinnedCards[index].displayMargin = margin * 100; 
+            if(this.pinnedCards[index].Floor_Margin__c > margin){
+                this.pinnedCards[index].displayPrice = 'below floor'
+                this.pinnedCards[index].displayMargin = margin;
+            }else{
+                this.pinnedCards[index].displayPrice = `$${roundNum((cost/(1- (margin)/100)), 2 )}`;
+                this.pinnedCards[index].displayMargin = margin; 
+            }
         },500)
     }
     fadeWarn(){
