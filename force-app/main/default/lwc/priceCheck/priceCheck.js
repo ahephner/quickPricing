@@ -215,7 +215,7 @@ export default class PriceCheck extends LightningElement {
     async checkInventory(locId){
         this.warehouse = locId.detail.value; 
         this.loaded = false;
-        let data = this.isPinned = true ? [...this.prod, ...this.pinnedCards] : [...this.prod];
+        let data = this.isPinned ? [...this.prod, ...this.pinnedCards] : [...this.prod];
         let pcSet = new Set();
         let prodCodes = [];
         try{
@@ -227,10 +227,12 @@ export default class PriceCheck extends LightningElement {
             let inCheck = await inCounts({pc:prodCodes, locId:this.warehouse});
            //console.log('inCheck ' +JSON.stringify(inCheck));
             this.prod = this.warehouse === 'All' ? await allInventory(data, inCheck) : await newInventory(data, inCheck);
-            let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';
-            this.prod.splice(this.prod.findIndex(a=>a.Id ===this.pinnedCards[0].Id), 1) 
-            this.pinnedCards[0].allStock = back?.allStock ?? 'not found'; 
-            this.pinnedCards[0].wInv = back?.wInv ?? 'not found'; 
+            if(this.isPinned){
+                let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';
+                this.prod.splice(this.prod.findIndex(a=>a.Id ===this.pinnedCards[0].Id), 1) 
+                this.pinnedCards[0].allStock = back?.allStock ?? 'not found'; 
+                this.pinnedCards[0].wInv = back?.wInv ?? 'not found'; 
+            }
              
             
             //console.log(JSON.stringify(this.prod)); 
