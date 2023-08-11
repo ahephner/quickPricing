@@ -1,9 +1,14 @@
 import { LightningElement,track,api } from 'lwc';
+import { createRecord } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 import inCounts from '@salesforce/apex/cpqApex.inCounts';
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import Id from '@salesforce/user/Id';
+import TERM from '@salesforce/schema/Query__c.Term__c';
+import SUC from '@salesforce/schema/Query__c.successful__c';
+import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
 export default class PriceCheck extends LightningElement {
     searchTerm;
     priceBook = '01s410000077vSKAAY';
@@ -15,6 +20,8 @@ export default class PriceCheck extends LightningElement {
     showInventory = false; 
     warehouse; 
     error; 
+    success;
+    recFound;  
     @track pinnedCards = [];
     @track prod = [];
 
@@ -45,6 +52,8 @@ export default class PriceCheck extends LightningElement {
         this.loaded = false
         checkPrice({priceBookId: this.priceBook, searchKey: this.searchTerm})
         .then((res)=>{
+                this.success = res.length > 0 ? true : false; 
+                this.recFound = res.length; 
                 let name;
                 let cost; 
                 let flr;
@@ -77,12 +86,33 @@ export default class PriceCheck extends LightningElement {
                 })
 
         }).then(()=>{
+            const fields = {}
+            fields[TERM.fieldApiName] = this.searchTerm; 
+            fields[SUC.fieldApiName] = this.success;
+            fields[COUNT.fieldApiName] = this.recFound;
+            const recordInput = {apiName: 'Query__c', fields:fields}
+            createRecord(recordInput).then((record)=>{}).catch((e)=>{
+                const evt = new ShowToastEvent({
+                    title: 'Error loading inventory',
+                    message: JSON.stringify(e),
+                    variant: 'warning'
+                });
+                this.dispatchEvent(evt);
+            })
+        }).then(()=>{
             this.loaded = true; 
             this.searchTerm = ''; 
             let x = this.template.querySelector('lightning-input').value;
             x = ''; 
             //console.log(JSON.stringify(this.prod));
             
+        }).catch((e)=>{
+            const evt = new ShowToastEvent({
+                title: 'Error loading inventory',
+                message: JSON.stringify(e),
+                variant: 'warning'
+            });
+            this.dispatchEvent(evt);
         })
     }
  
