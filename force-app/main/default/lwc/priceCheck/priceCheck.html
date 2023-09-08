@@ -17,6 +17,7 @@
                         <lightning-button variant="brand" label="Search" 
                         title="search" onclick={handleSearch}></lightning-button>
                     </div>
+            
                 </template>
                 <template if:false={formSize}>
                     <div class="slds-col slds-size_9-of-12">
@@ -66,7 +67,7 @@
                            <!-- Top Line -->
                            <div class="slds-grid">
                             <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
-                                <a href={y.url} target='_blank' class="searchLinks">
+                                <a href='#' name={y.url} onclick={navigateToRelatedList} class="searchLinks">
                                     {y.name}
                                 </a>
                             </div>
@@ -142,7 +143,7 @@
                            <!-- Top Line -->
                             <div class="slds-grid">
                                 <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
-                                    <a href={x.url} target='_blank' class="searchLinks">
+                                    <a href='#' name={x.url} onclick={navigateToRelatedList} class="searchLinks">
                                         {x.name}
                                     </a>
                                 </div>

@@ -1,7 +1,8 @@
-import { LightningElement,track,api } from 'lwc';
+import { LightningElement,track, wire } from 'lwc';
 import { createRecord } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
+import wareHouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
 import inCounts from '@salesforce/apex/cpqApex.inCounts';
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -9,7 +10,8 @@ import Id from '@salesforce/user/Id';
 import TERM from '@salesforce/schema/Query__c.Term__c';
 import SUC from '@salesforce/schema/Query__c.successful__c';
 import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
-export default class PriceCheck extends LightningElement {
+import { NavigationMixin } from "lightning/navigation";
+export default class PriceCheck extends NavigationMixin(LightningElement) {
     searchTerm;
     priceBook = '01s410000077vSKAAY';
     loaded; 
@@ -25,7 +27,24 @@ export default class PriceCheck extends LightningElement {
     @track pinnedCards = [];
     @track prod = [];
 
-    
+    //get warehouse
+    @wire(wareHouses)
+    wiredWarehouse({ error, data }) {
+        if (data) {
+            let back  = data.map((item, index) =>({
+                ...item, 
+                label:item.Name, 
+                value:item.Id
+            
+            }))
+            back.unshift({label:'All', value:'All'})
+            this.warehouseOptions = [...back]; 
+            
+        } else if (error) {
+            this.error = error;
+            console.error(this.error)
+        }
+    } 
     connectedCallback(){ 
         this.formSize = this.screenSize(FORM_FACTOR);
         this.loaded = true;     
@@ -34,7 +53,7 @@ export default class PriceCheck extends LightningElement {
     screenSize = (screen) => {
         return screen === 'Large'? true : false  
     }
-
+   
     handleKeys(evt){
         let enterKey = evt.keyCode === 13;
         if(enterKey){
@@ -42,6 +61,18 @@ export default class PriceCheck extends LightningElement {
             this.handleSearch();
         }
     }
+    navigateToRelatedList(item) {
+        let recId = item.target.name; 
+        this[NavigationMixin.Navigate]({
+          type: "standard__recordRelationshipPage",
+          attributes: {
+            recordId: recId,
+            objectApiName: "Product2",
+            relationshipApiName: "ProductItems",
+            actionName: "view",
+          },
+        });
+      }
 
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
@@ -77,7 +108,7 @@ export default class PriceCheck extends LightningElement {
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
-                    url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
+                    url = x.Product2Id, 
                     showPricing = false; 
                     displayPrice = x.Level_2_UserView__c
                     displayMargin = x.Level_2_Margin__c 
@@ -92,12 +123,8 @@ export default class PriceCheck extends LightningElement {
             fields[COUNT.fieldApiName] = this.recFound;
             const recordInput = {apiName: 'Query__c', fields:fields}
             createRecord(recordInput).then((record)=>{}).catch((e)=>{
-                const evt = new ShowToastEvent({
-                    title: 'Error loading inventory',
-                    message: JSON.stringify(e),
-                    variant: 'warning'
-                });
-                this.dispatchEvent(evt);
+                    let warn = JSON.stringify(e);
+                    console.error(warn)
             })
         }).then(()=>{
             this.loaded = true; 
@@ -115,7 +142,7 @@ export default class PriceCheck extends LightningElement {
             this.dispatchEvent(evt);
         })
     }
- 
+
     openInputs(evt){
         let targId = evt.currentTarget.dataset.name
         let index = this.prod.findIndex(x=>x.Id === targId)
@@ -209,38 +236,38 @@ export default class PriceCheck extends LightningElement {
         
     }
 
-    get warehouseOptions(){
-        return [
-            {label:'All', value:'All'},
-            {label: '105 | Noblesville', value:'1312M000000PB0ZQAW'}, 
-            {label:'115 | ATS Ingalls', value:'1312M00000001nsQAA'},
-            {label:'125 | ATS Lebanon (Parts)', value:'1312M00000001ntQAA'},
-            {label:'200 | ATS Louisville', value:'1312M00000001nuQAA'},
-            {label:'250 | ATS Florence', value:'1312M00000001nvQAA'},
-            {label:'270 | ATS Winston-Salem', value:'1312M00000001nwQAA'},
-            {label:'310 | ATS Tomball', value:'1312M000000PB6AQAW'},
-            {label:'360 | ATS Nashville', value:'1312M00000001nxQAA'},
-            {label:'400 | ATS Columbus', value:'1312M00000001nyQAA'},
-            {label:'415 | ATS Sharonville', value:'1312M00000001nzQAA'},
-            {label:'440 | ATS Lewis Center', value:'1312M00000001o0QAA'},
-            {label:'450 | ATS Brecksville', value:'1312M00000001o1QAA'},
-            {label:'470 | ATS Boardman', value:'1312M00000001o2QAA'},
-            {label:'510 | ATS Travis City', value:'1312M00000001o3QAA'},
-            {label:'520 | ATS Farmington Hills', value:'1312M00000001o4QAA'},
-            {label:'600 | ATS - Elkhart', value:'1312M00000001o5QAA'},
-            {label:'710 | ATS - St. Peters', value:'1312M00000001o6QAA'},
-            {label:'720 | ATS - Cape Girardeau', value:'1312M00000001o7QAA'},
-            {label:'730 | ATS - Columbia', value:'1312M00000001o8QAA'},
-            {label:'770 | ATS - Riverside', value:'1312M00000001o9QAA'},
-            {label:'790 | ATS - Springfield', value:'1312M0000004D7IQAU'},
-            {label:'820 | ATS - Wheeling', value:'1312M000000PB0UQAW'},
-            {label:'850 | ATS - Madison', value:'1312M00000001oAQAQ'},
-            {label:'860 | ATS - East Peoria', value:'1312M000000PB2BQAW'},
-            {label:'960 | ATS - Monroeville', value:'1312M00000001oBQAQ'},
-            {label:'980 | ATS - Ashland', value:'1312M00000001oCQAQ'},
-            {label:'999 | ATS - Fishers', value:'1312M000000PB3FQAW'}
-        ];
-    }
+    // get warehouseOptions(){
+    //     return [
+    //         {label:'All', value:'All'},
+    //         {label: '105 | Noblesville', value:'1312M000000PB0ZQAW'}, 
+    //         {label:'115 | ATS Ingalls', value:'1312M00000001nsQAA'},
+    //         {label:'125 | ATS Lebanon (Parts)', value:'1312M00000001ntQAA'},
+    //         {label:'200 | ATS Louisville', value:'1312M00000001nuQAA'},
+    //         {label:'250 | ATS Florence', value:'1312M00000001nvQAA'},
+    //         {label:'270 | ATS Winston-Salem', value:'1312M00000001nwQAA'},
+    //         {label:'310 | ATS Tomball', value:'1312M000000PB6AQAW'},
+    //         {label:'360 | ATS Nashville', value:'1312M00000001nxQAA'},
+    //         {label:'400 | ATS Columbus', value:'1312M00000001nyQAA'},
+    //         {label:'415 | ATS Sharonville', value:'1312M00000001nzQAA'},
+    //         {label:'440 | ATS Lewis Center', value:'1312M00000001o0QAA'},
+    //         {label:'450 | ATS Brecksville', value:'1312M00000001o1QAA'},
+    //         {label:'470 | ATS Boardman', value:'1312M00000001o2QAA'},
+    //         {label:'510 | ATS Travis City', value:'1312M00000001o3QAA'},
+    //         {label:'520 | ATS Farmington Hills', value:'1312M00000001o4QAA'},
+    //         {label:'600 | ATS - Elkhart', value:'1312M00000001o5QAA'},
+    //         {label:'710 | ATS - St. Peters', value:'1312M00000001o6QAA'},
+    //         {label:'720 | ATS - Cape Girardeau', value:'1312M00000001o7QAA'},
+    //         {label:'730 | ATS - Columbia', value:'1312M00000001o8QAA'},
+    //         {label:'770 | ATS - Riverside', value:'1312M00000001o9QAA'},
+    //         {label:'790 | ATS - Springfield', value:'1312M0000004D7IQAU'},
+    //         {label:'820 | ATS - Wheeling', value:'1312M000000PB0UQAW'},
+    //         {label:'850 | ATS - Madison', value:'1312M00000001oAQAQ'},
+    //         {label:'860 | ATS - East Peoria', value:'1312M000000PB2BQAW'},
+    //         {label:'960 | ATS - Monroeville', value:'1312M00000001oBQAQ'},
+    //         {label:'980 | ATS - Ashland', value:'1312M00000001oCQAQ'},
+    //         {label:'999 | ATS - Fishers', value:'1312M000000PB3FQAW'}
+    //     ];
+    // }
 
     async checkInventory(locId){
         this.warehouse = locId.detail.value; 
