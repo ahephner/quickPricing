@@ -168,7 +168,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
         let index = this.prod.findIndex(x=>x.Id === evt.target.name);
         this.delay = setTimeout(()=>{
             let cost = this.prod[index].cost;
-            console.log(1,this.prod[index].Floor_Margin__c, 2,margin, 3,this.prod[index].Floor_Margin__c < margin )
+            //console.log(1,this.prod[index].Floor_Margin__c, 2,margin, 3,this.prod[index].Floor_Margin__c < margin )
             if(this.prod[index].Floor_Margin__c > margin){
                 this.prod[index].displayPrice = 'below floor'
                 this.prod[index].displayMargin = margin;
@@ -282,7 +282,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
             prodCodes = [...pcSet];
 
             let inCheck = await inCounts({pc:prodCodes, locId:this.warehouse});
-           //console.log('inCheck ' +JSON.stringify(inCheck));
+           console.log('inCheck ' +JSON.stringify(inCheck));
             this.prod = this.warehouse === 'All' ? await allInventory(data, inCheck) : await newInventory(data, inCheck);
             if(this.isPinned){
                 let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';

@@ -228,8 +228,8 @@
       //loop over the joined arrays. Set inventory if there is some otherwise return 0;
       //have to delete the key value otherwise it is cached.  
       for(let i=0; i<merge.length; i++){
-            merge[i].wInv = merge[i].Total_Product_Items__c ? merge[i].Total_Product_Items__c : 0
-            delete merge[i].Total_Product_Items__c; 
+            merge[i].wInv = merge[i].Quantity_Available__c ? merge[i].Quantity_Available__c : 0
+            delete merge[i].Quantity_Available__c; 
       }
     return merge;
   }
