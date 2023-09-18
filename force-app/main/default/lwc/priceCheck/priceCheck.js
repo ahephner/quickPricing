@@ -3,7 +3,7 @@ import { createRecord } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 import wareHouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
-import inCounts from '@salesforce/apex/cpqApex.inCounts';
+import inCounts from '@salesforce/apex/quickPriceSearch.inCounts';
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import Id from '@salesforce/user/Id';
@@ -236,7 +236,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
         
     }
 
-    // get warehouseOptions(){
+    //  get warehouseOptions(){
     //     return [
     //         {label:'All', value:'All'},
     //         {label: '105 | Noblesville', value:'1312M000000PB0ZQAW'}, 
@@ -267,7 +267,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
     //         {label:'980 | ATS - Ashland', value:'1312M00000001oCQAQ'},
     //         {label:'999 | ATS - Fishers', value:'1312M000000PB3FQAW'}
     //     ];
-    // }
+    //  }
 
     async checkInventory(locId){
         this.warehouse = locId.detail.value; 
@@ -282,7 +282,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
             prodCodes = [...pcSet];
 
             let inCheck = await inCounts({pc:prodCodes, locId:this.warehouse});
-           console.log('inCheck ' +JSON.stringify(inCheck));
+
             this.prod = this.warehouse === 'All' ? await allInventory(data, inCheck) : await newInventory(data, inCheck);
             if(this.isPinned){
                 let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';

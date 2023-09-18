@@ -27,7 +27,29 @@
               return a1;
             }   
    }
+//sum an array of objects based on key and values; 
+   const sumByKey = (arr, key, value) => {
+    const map = new Map();
+    //iterate the array and set key with value
+    for(const obj of arr) {
+      const currSum = map.get(obj[key]) || 0;
+      map.set(obj[key], currSum + obj[value]);
+    }
+    //create array with values
+    const res = Array.from(map, ([k, v]) => ({[key]: k, [value]: v}));
+    return res;
+  }
 
+  const reNameKey = (obj, oldValue, newValue)=> {
+    let ov = oldValue;
+    let nv = newValue;
+    for(let key of obj){
+      key[nv] = key[ov];
+      delete key[ov]; 
+    }
+    let back = [...obj]
+    return back; 
+  }
    //merge last quote amount
    const mergeLastQuote = (a1, a3) =>{
     // console.log(JSON.stringify(a1))
@@ -219,18 +241,16 @@
     return merge;
   }
   const allInventory = (selectedProd, counts) =>{
+    //sum qty avaliable
+    let sumQty = sumByKey(counts,"Product_Code__c", "Quantity_Available__c" ); 
+    let newKey = reNameKey(sumQty, 'Quantity_Available__c', 'wInv')
     
     let merge = selectedProd.map(prod => ({
-      ...counts.find((inv) => (inv.Product_Code__c === prod.ProductCode)),
+      ...newKey.find((inv) => (inv.Product_Code__c === prod.ProductCode)),
                           ...prod
                       })
                       )
-      //loop over the joined arrays. Set inventory if there is some otherwise return 0;
-      //have to delete the key value otherwise it is cached.  
-      for(let i=0; i<merge.length; i++){
-            merge[i].wInv = merge[i].Quantity_Available__c ? merge[i].Quantity_Available__c : 0
-            delete merge[i].Quantity_Available__c; 
-      }
+
     return merge;
   }
   //Update totals 
@@ -339,5 +359,7 @@ export{ validate,
         checkRUP,
         sortArray,
         removeLineItem,
-        loadCheck
+        loadCheck,
+        sumByKey,
+        reNameKey
       }
