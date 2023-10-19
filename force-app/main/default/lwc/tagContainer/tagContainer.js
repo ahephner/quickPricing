@@ -1,5 +1,5 @@
 import { LightningElement,track } from 'lwc';
-import searchTag from '@salesforce/apex/quickPriceSearch.searchTag';
+import searchTag from '@salesforce/apex/cpqTagsSearch.searchTag';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class TagContainer extends LightningElement {
@@ -46,7 +46,8 @@ export default class TagContainer extends LightningElement {
                
                 name = x.Product_Name__c,
                 score = x.ATS_Score__c
-                url = 'https://advancedturf--cpq.sandbox.lightning.force.com/lightning/r/Tag__c/'+x.Id+'/view'
+                //url = 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+x.Product__c+'/related/ProductItems/view'
+                url = 'https://advancedturf.lightning.force.com/lightning/r/Product2/'+x.Product__c+'/related/ProductItems/view';
                 tagDesc = x.Tag_Description__c
                 return {...x, name, score, url, tagDesc}
             })

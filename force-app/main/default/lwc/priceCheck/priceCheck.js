@@ -10,8 +10,8 @@ import Id from '@salesforce/user/Id';
 import TERM from '@salesforce/schema/Query__c.Term__c';
 import SUC from '@salesforce/schema/Query__c.successful__c';
 import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
-import { NavigationMixin } from "lightning/navigation";
-export default class PriceCheck extends NavigationMixin(LightningElement) {
+//import { NavigationMixin } from "lightning/navigation"; dont forget to wrap lightningelement below
+export default class PriceCheck extends LightningElement {
     searchTerm;
     priceBook = '01s410000077vSKAAY';
     loaded; 
@@ -61,18 +61,18 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
             this.handleSearch();
         }
     }
-    navigateToRelatedList(item) {
-        let recId = item.target.name; 
-        this[NavigationMixin.Navigate]({
-          type: "standard__recordRelationshipPage",
-          attributes: {
-            recordId: recId,
-            objectApiName: "Product2",
-            relationshipApiName: "ProductItems",
-            actionName: "view",
-          },
-        });
-      }
+    // navigateToRelatedList(item) {
+    //     let recId = item.target.name; 
+    //     this[NavigationMixin.Navigate]({
+    //       type: "standard__recordRelationshipPage",
+    //       attributes: {
+    //         recordId: recId,
+    //         objectApiName: "Product2",
+    //         relationshipApiName: "ProductItems",
+    //         actionName: "view",
+    //       },
+    //     });
+    //   }
 
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
@@ -108,7 +108,11 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
-                    url = x.Product2Id, 
+                    //for navigation mixin
+                    //url = x.Product2Id, 
+                    url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
+                    //sandbox
+                    //url = 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
                     displayPrice = x.Level_2_UserView__c
                     displayMargin = x.Level_2_Margin__c 

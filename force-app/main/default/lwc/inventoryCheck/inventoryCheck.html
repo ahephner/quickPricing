@@ -1,0 +1,50 @@
+<template>
+    <template if:true={formSize}>
+    <div class="slds-grid slds-wrap">
+            <div class="slds-col slds-size_5-of-12">
+                <div onkeyup={handleKeys}>
+                    <lightning-input type="text" 
+                        variant="standard" 
+                        name="name" 
+                        label="Search" 
+                        placeholder="type here..."
+                        data-value="searchInput"></lightning-input>
+                </div>
+            </div>
+                <div class="slds-col slds-size_5-of-12">
+                    <lightning-combobox
+                    name="warehouse"
+                    label="Warehouse"
+                    value={selWareHouse}
+                    options={warehouseOptions}
+                    onchange={changeWarehouse} ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_2-of-12 slds-m-top_large">
+                    <lightning-button 
+                    variant="brand"
+                    label="Search" 
+                    onclick={handleSearch} 
+                    ></lightning-button>
+                </div>
+<!-- search bar above -->
+        </div>
+        <div class="slds-grid slds-wrap">
+<!-- Loading Spinner -->
+            <template if:false={loaded}>
+                <div class="exampleHolder">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={loaded}>
+                <lightning-layout multiple-rows="true">
+                    <template if:true={prodData} for:each={prodData} for:item="x" for:index="index">
+                        <lightning-layout-item key={x.Id}  class="card" size="12">
+                            {x.Product2.Name } - {x.Product_Code__c} <p>Total Items</p> {x.Total_Product_Items__c} <p>qty ava</p> {x.Quantity_Available__c}
+                        
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </template>
+        </div>
+    </template>
+</template>
