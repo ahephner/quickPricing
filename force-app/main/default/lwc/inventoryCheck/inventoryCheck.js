@@ -1,8 +1,9 @@
 import { LightningElement, wire  } from 'lwc';
-import { getRecord, getFieldValue } from "lightning/uiRecordApi";
-import getWarehouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
-import userWareHouse from '@salesforce/apex/quickPriceSearch.userLocation';
-import searchInventory from '@salesforce/apex/quickPriceSearch.searchInventory'
+
+import getWarehouses from '@salesforce/apex/lwcHelper.getWarehouse';
+import userWareHouse from '@salesforce/apex/lwcHelper.userLocation';
+import searchInventory from '@salesforce/apex/quickPriceSearch.searchInventory';
+import getPickListValues from '@salesforce/apex/lwcHelper.getPickListValues'
 import userId from '@salesforce/user/Id';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
@@ -12,7 +13,14 @@ export default class InventoryCheck extends LightningElement {
     selWareHouse; 
     formSize;
     prodData; 
-    loaded = false; 
+    loaded = true; 
+    recordTypeId
+    subCat = 'All';
+    primCat = 'All'; 
+    primaryValues
+    subValues
+    showCats = false; 
+
     connectedCallback(){
         this.formSize = this.screenSize(FORM_FACTOR);
         this.init(); 
@@ -23,7 +31,9 @@ export default class InventoryCheck extends LightningElement {
     async init(){
         let back = await getWarehouses()
         this.userwareHouseNumb = await userWareHouse({userId: this.userId});
-        
+        this.primaryValues = await getPickListValues({objName: 'Product2', fieldAPI: 'Primary_Category__c'});
+        this.subValues = await getPickListValues({objName: 'Product2', fieldAPI:'Subcategory__c'})
+        this.primCat = this.primaryValues[0].value;  
         let mapped = await back.map((item, index) =>({
                                     ...item, 
                                     label:item.Name, 
@@ -58,5 +68,15 @@ export default class InventoryCheck extends LightningElement {
         }
         this.prodData = await searchInventory({term: this.searchTerm, locId: this.selWareHouse});
         this.loaded = true; 
+    }
+
+    setPrime(x){
+        this.primCat = x.detail.value
+    }
+    setSub(x){
+        this.subCat = x.detail.value; 
+    }
+    handleShowCats(){
+        this.showCats = this.showCats ? false : true; 
     }
 }
