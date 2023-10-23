@@ -29,12 +29,12 @@
             </div>
             <div class="slds-grid slds-m-top_small">
                 <template if:false={showCats}>
-                    <lightning-icon icon-name="utility:chevronright" alternative-text="Connected" size="xx-small"
+                    <lightning-icon icon-name="utility:add" alternative-text="Connected" size="xx-small"
                     title="xx-small size" onclick={handleShowCats}></lightning-icon>
                 </template>
                 <template if:true={showCats}>
                     <div class="slds-col slds-size_1-of-12 chevron">
-                        <lightning-icon icon-name="utility:chevrondown" alternative-text="Connected" size="xx-small"
+                        <lightning-icon icon-name="utility:dash" alternative-text="Connected" size="xx-small"
                         title="xx-small size" onclick={handleShowCats}></lightning-icon>
                     </div>
 
@@ -66,16 +66,33 @@
                     <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
                 </div>
             </template>
+        </div>
             <template if:true={loaded}>
                 <lightning-layout multiple-rows="true">
                     <template if:true={prodData} for:each={prodData} for:item="x" for:index="index">
-                        <lightning-layout-item key={x.Id}  class="card" size="12">
-                            {x.Product2.Name } - {x.Product_Code__c} <p>Total Items</p> {x.Total_Product_Items__c} <p>qty ava</p> {x.Quantity_Available__c}
-                        
+                        <lightning-layout-item key={x.Id}  class="card slds-m-top_x-small" size="12">
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
+                                    <a href={x.url} target='_blank' class="searchLinks">
+                                        {x.Product2.Name}
+                                    </a>
+                                </div>
+                                <div class="slds-col slds-size-1-of-4 ">
+                                    <span class="stockStatus">
+                                        Status: <b>{x.Product2.Product_Status__c}</b>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-m-left_x-small code">
+                                {x.Product_Code__c}
+                            </div>
+<!-- inventory info -->
+                            <div class="slds-grid slds-m-left_x-small slds-m-top_x-small">
+                                <p>{x.inv}</p>
+                            </div>
                         </lightning-layout-item>
                     </template>
                 </lightning-layout>
             </template>
-        </div>
     <!-- </template> -->
 </template>
