@@ -88,7 +88,9 @@
                             </div>
 <!-- inventory info -->
                             <div class="slds-grid slds-m-left_x-small slds-m-top_x-small">
-                                <p>{x.inv}</p>
+                                 <p class="slds-col slds-size_1-of-6">On Hand: {x.QuantityOnHand}</p> 
+                                 <p class="slds-col slds-size_1-of-6">Allocated: {x.allocated}</p> 
+                                 <p class="slds-col slds-size_1-of-6">On Available: {x.Quantity_Available__c}</p> 
                             </div>
                         </lightning-layout-item>
                     </template>
