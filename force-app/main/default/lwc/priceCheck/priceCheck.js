@@ -3,15 +3,15 @@ import { createRecord } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 import wareHouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
-import inCounts from '@salesforce/apex/cpqApex.inCounts';
+import inCounts from '@salesforce/apex/quickPriceSearch.inCounts';
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import Id from '@salesforce/user/Id';
 import TERM from '@salesforce/schema/Query__c.Term__c';
 import SUC from '@salesforce/schema/Query__c.successful__c';
 import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
-import { NavigationMixin } from "lightning/navigation";
-export default class PriceCheck extends NavigationMixin(LightningElement) {
+//import { NavigationMixin } from "lightning/navigation"; dont forget to wrap lightningelement below
+export default class PriceCheck extends LightningElement {
     searchTerm;
     priceBook = '01s410000077vSKAAY';
     loaded; 
@@ -61,18 +61,18 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
             this.handleSearch();
         }
     }
-    navigateToRelatedList(item) {
-        let recId = item.target.name; 
-        this[NavigationMixin.Navigate]({
-          type: "standard__recordRelationshipPage",
-          attributes: {
-            recordId: recId,
-            objectApiName: "Product2",
-            relationshipApiName: "ProductItems",
-            actionName: "view",
-          },
-        });
-      }
+    // navigateToRelatedList(item) {
+    //     let recId = item.target.name; 
+    //     this[NavigationMixin.Navigate]({
+    //       type: "standard__recordRelationshipPage",
+    //       attributes: {
+    //         recordId: recId,
+    //         objectApiName: "Product2",
+    //         relationshipApiName: "ProductItems",
+    //         actionName: "view",
+    //       },
+    //     });
+    //   }
 
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
@@ -108,7 +108,11 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
-                    url = x.Product2Id, 
+                    //for navigation mixin
+                    //url = x.Product2Id, 
+                    url = 'https://advancedturf.lightning.force.com/lightning/r/'+x.Product2Id+'/related/ProductItems/view'
+                    //sandbox
+                    //url = 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
                     displayPrice = x.Level_2_UserView__c
                     displayMargin = x.Level_2_Margin__c 
@@ -168,7 +172,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
         let index = this.prod.findIndex(x=>x.Id === evt.target.name);
         this.delay = setTimeout(()=>{
             let cost = this.prod[index].cost;
-            console.log(1,this.prod[index].Floor_Margin__c, 2,margin, 3,this.prod[index].Floor_Margin__c < margin )
+            //console.log(1,this.prod[index].Floor_Margin__c, 2,margin, 3,this.prod[index].Floor_Margin__c < margin )
             if(this.prod[index].Floor_Margin__c > margin){
                 this.prod[index].displayPrice = 'below floor'
                 this.prod[index].displayMargin = margin;
@@ -236,7 +240,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
         
     }
 
-    // get warehouseOptions(){
+    //  get warehouseOptions(){
     //     return [
     //         {label:'All', value:'All'},
     //         {label: '105 | Noblesville', value:'1312M000000PB0ZQAW'}, 
@@ -267,7 +271,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
     //         {label:'980 | ATS - Ashland', value:'1312M00000001oCQAQ'},
     //         {label:'999 | ATS - Fishers', value:'1312M000000PB3FQAW'}
     //     ];
-    // }
+    //  }
 
     async checkInventory(locId){
         this.warehouse = locId.detail.value; 
@@ -282,7 +286,7 @@ export default class PriceCheck extends NavigationMixin(LightningElement) {
             prodCodes = [...pcSet];
 
             let inCheck = await inCounts({pc:prodCodes, locId:this.warehouse});
-           //console.log('inCheck ' +JSON.stringify(inCheck));
+
             this.prod = this.warehouse === 'All' ? await allInventory(data, inCheck) : await newInventory(data, inCheck);
             if(this.isPinned){
                 let back = this.isPinned = true ? this.prod.find(x => x.Id === this.pinnedCards[0].Id) : '';

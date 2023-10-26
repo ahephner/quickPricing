@@ -1,0 +1,100 @@
+<template>
+    <!-- <template if:true={formSize}> -->
+    <div class="slds-grid slds-wrap">
+            <div class="slds-col slds-size_5-of-12">
+                <div onkeyup={handleKeys}>
+                    <lightning-input type="text" 
+                        variant="standard" 
+                        name="name" 
+                        label="Search" 
+                        placeholder="type here..."
+                        data-value="searchInput"></lightning-input>
+                </div>
+            </div>
+                <div class="slds-col slds-size_5-of-12">
+                    <lightning-combobox
+                    name="warehouse"
+                    label="Warehouse"
+                    value={selWareHouse}
+                    options={warehouseOptions}
+                    onchange={changeWarehouse} ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_2-of-12 slds-m-top_large">
+                    <lightning-button 
+                    variant="brand"
+                    label="Search" 
+                    onclick={handleSearch} 
+                    ></lightning-button>
+                </div>
+            </div>
+            <div class="slds-grid slds-m-top_small">
+                <template if:false={showCats}>
+                    <lightning-icon icon-name="utility:add" alternative-text="Connected" size="xx-small"
+                    title="xx-small size" onclick={handleShowCats}></lightning-icon>
+                </template>
+                <template if:true={showCats}>
+                    <div class="slds-col slds-size_1-of-12 chevron">
+                        <lightning-icon icon-name="utility:dash" alternative-text="Connected" size="xx-small"
+                        title="xx-small size" onclick={handleShowCats}></lightning-icon>
+                    </div>
+
+                    <div class="slds-col slds-size_5-of-12">
+                        <lightning-combobox
+                            name="primCat"
+                            label="Primary Category"
+                            value={primCat}
+                            options={primaryValues}
+                            onchange={setPrime} ></lightning-combobox> 
+                    </div>
+                            
+                    <div class="slds-col slds-size_5-of-12 slds-m-left_small">
+                        <lightning-combobox
+                        name="subCat"
+                        label="Subcategory"
+                        value={subCat}
+                        options={subValues}
+                        onchange={setSub} ></lightning-combobox>
+                    </div>
+                </template>
+           
+            </div> 
+            <!-- search bar above -->
+        <div class="slds-grid slds-wrap">
+<!-- Loading Spinner -->
+            <template if:false={loaded}>
+                <div class="exampleHolder">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+        </div>
+            <template if:true={loaded}>
+                <lightning-layout multiple-rows="true">
+                    <template if:true={prodData} for:each={prodData} for:item="x" for:index="index">
+                        <lightning-layout-item key={x.Id}  class="card slds-m-top_x-small" size="12">
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
+                                    <a href={x.url} target='_blank' class="searchLinks">
+                                        {x.Product2.Name}
+                                    </a>
+                                </div>
+                                <div class="slds-col slds-size-1-of-4 ">
+                                    <span class="stockStatus">
+                                        Status: <b>{x.Product2.Product_Status__c}</b>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-m-left_x-small code">
+                                {x.Product_Code__c}
+                            </div>
+<!-- inventory info -->
+                            <div class="slds-grid slds-m-left_x-small slds-m-top_x-small">
+                                 <p class="slds-col slds-size_1-of-6">On Hand: {x.QuantityOnHand}</p> 
+                                 <p class="slds-col slds-size_1-of-6">Allocated: {x.allocated}</p> 
+                                 <p class="slds-col slds-size_1-of-6">On Available: {x.Quantity_Available__c}</p> 
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </template>
+    <!-- </template> -->
+</template>
