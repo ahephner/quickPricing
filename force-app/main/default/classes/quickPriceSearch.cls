@@ -49,64 +49,33 @@ public class quickPriceSearch {
     }
     
        //this allows the user to switch the inventory check on the product screen 
-    @AuraEnabled(cacheable = true)
-    public static list<productitem> searchInventory(string term, string locId){
-        list<productitem> counts = new list<productitem>();
-        string searchTerm = '%'+term+'%'; 
-        if(locId == 'All'){
+    //@AuraEnabled(cacheable = true)
+    //public static list<productitem> searchInventory(string term, string locId){
+      //  list<productitem> counts = new list<productitem>();
+        //string searchTerm = '%'+term+'%'; 
+        //if(locId == 'All'){
             
-            counts = [select Total_Product_Items__c, Product_Code__c,Quantity_Available__c,Product2.Name 
-                      from ProductItem where Product_Class__c = 'Simple' and (Product_Code__c like: searchTerm or Product2.Name like: searchTerm)];
+          //  counts = [select Total_Product_Items__c, Product_Code__c,Quantity_Available__c,Product2.Name 
+            //          from ProductItem where Product_Class__c = 'Simple' and (Product_Code__c like: searchTerm or Product2.Name like: searchTerm)
+              //       order by Product2.Product_Status__c, quantityonhand desc nulls last];
             
-        }else{
-            counts = [select QuantityOnHand, Product_Code__c, Quantity_Available__c,Product2.Name 
-                      from ProductItem where Product_Class__c = 'Simple' and LocationId =: locId 
-                             and (Product_Code__c like: searchTerm or Product2.Name like: searchTerm)];
+       // }else{
+         //   counts = [select QuantityOnHand, Product_Code__c, Quantity_Available__c,Product2.Name 
+           //           from ProductItem where Product_Class__c = 'Simple' and LocationId =: locId 
+             //                and (Product_Code__c like: searchTerm or Product2.Name like: searchTerm)
+               //      order by Product2.Product_Status__c, quantityonhand desc nulls last];
         
-        }
+       // }
 
-        return counts; 
+//        return counts; 
+  //  }
+    
+	@AuraEnabled(cacheable = true)
+    public static list<productitem> warehouseInventory(string query){
+        list<productitem> results = Database.query(query);
+        return results; 
     }
     
-    @AuraEnabled(cacheable = true)
-    public static string userLocation(string userId){
-        string warehouse = [select my_location__c from user where id =:userId].My_Location__c; 
-        return warehouse; 
-    }
-
-    @AuraEnabled(cacheable=true)
-public static List<Map<String,String>> getPicklistValues(String objectName, String fieldName) {
-    Boolean hasDefault = false;
-    List<Map<String,String>> values = new List<Map<String,String>>();
-
-
-    for(PicklistEntry e: ((SObject)(Type.forName('Schema.'+objectName).newInstance())).getSObjectType()
-    .getDescribe().fields.getMap().get(fieldName).getDescribe().getPicklistValues()) 
-    {
-        if(e.isActive()) {
-            values.add(
-                new Map<String, String> {
-                    'label' => e.getLabel(),
-                        'value' => e.getValue()
-                        }
-            );       
-        }  
-
-        if(e.isDefaultValue()) {
-            hasDefault = true;
-        }
-    }
-    // we need to add a blank picklist value if a field has no default value,
-    // because that means the field is blank in the UI.       
-    if(!hasDefault) { 
-        values.add(0,
-                    new Map<String, String> {
-                        'label' => '',
-                            'value' => null
-                            }
-                   );         
-    }
-
-    return values;
-}
+    
+    
 }
