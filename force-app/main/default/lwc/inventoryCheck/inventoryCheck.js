@@ -3,7 +3,7 @@ import { LightningElement, wire  } from 'lwc';
 import getWarehouses from '@salesforce/apex/lwcHelper.getWarehouse';
 import userWareHouse from '@salesforce/apex/lwcHelper.userLocation';
 import warehouseInventory from '@salesforce/apex/quickPriceSearch.warehouseInventory';
-import getPickListValues from '@salesforce/apex/lwcHelper.getPickListValues'
+//import getPickListValues from '@salesforce/apex/lwcHelper.getPickListValues'
 import multiplePicklists from '@salesforce/apex/lwcHelper.multiplePicklists2'
 import userId from '@salesforce/user/Id';
 import FORM_FACTOR from '@salesforce/client/formFactor';
@@ -101,6 +101,7 @@ export default class InventoryCheck extends LightningElement {
             allocated: item.Quantity_Allocated__c === undefined? 0 : item.Quantity_Allocated__c,
            // inv: `On Hand: ${item.QuantityOnHand}   Allocated: ${allocated}   Available: ${item.Quantity_Available__c}`,
             url: 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+item.Product2Id+'/related/ProductItems/view'
+            //url: `https://advancedturf.lightning.force.com/lightning/r/ProductItem/${item.Product2Id}/view`
         }))
         this.loaded = true; 
     }
