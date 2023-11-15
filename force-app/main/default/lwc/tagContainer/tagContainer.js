@@ -54,7 +54,7 @@ export default class TagContainer extends LightningElement {
             this.isFert = !this.isFert ? '' : this.isFert[0].replace(REGEX_NOWHITESPACE, '').replace(REGEX_SLASH,'\-'); 
             //grab non fertilizer search inputs. 2,4-D is a common product the ',' causes issues. Remove Fertilizer, Escape Hyphen,  Commas  add the 'and' to filter ie car , red  query would be car and red
             //remove stock status that is in the where clause of nested soql. Trim the search. 
-            this.searchTerm = searchInput.replace(REGEX_24D, '2 4-D').replace(REGEX_FERT,'').replace(REGEX_SLASH,'\-').replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES,'').trim();
+            this.searchTerm = searchInput.replace(REGEX_24D, '2 4-D').replace(REGEX_FERT,'').replace(REGEX_SLASH,'\-').replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES,'').split(' ').sort().join(' ').trim();
             //need to combine fert and searchTerm
             let finalSearch =  `\\"${this.isFert}\\" ${this.searchTerm}`
 
