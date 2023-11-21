@@ -4,12 +4,15 @@ import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.getPricing';
 import wareHouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
 import inCounts from '@salesforce/apex/quickPriceSearch.inCounts';
+import queryType from '@salesforce/apex/lwcHelper.getRecordTypeId'; 
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import Id from '@salesforce/user/Id';
 import TERM from '@salesforce/schema/Query__c.Term__c';
 import SUC from '@salesforce/schema/Query__c.successful__c';
 import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
+import RECTYPE from '@salesforce/schema/Query__c.RecordTypeId';
+import DEV from  '@salesforce/schema/Query__c.Device_Type__c';
 //import { NavigationMixin } from "lightning/navigation"; dont forget to wrap lightningelement below
 export default class PriceCheck extends LightningElement {
     searchTerm;
@@ -23,7 +26,9 @@ export default class PriceCheck extends LightningElement {
     warehouse; 
     error; 
     success;
-    recFound;  
+    recFound; 
+    queryRecordType  
+    deviceType;
     @track pinnedCards = [];
     @track prod = [];
 
@@ -45,12 +50,22 @@ export default class PriceCheck extends LightningElement {
             console.error(this.error)
         }
     } 
+
+    
+    @wire(queryType, ({objectName: 'Query__c', recTypeName: 'Quick_Search'}))
+    wiredRec({error, data}){
+        if(data){
+            this.queryRecordType = data;
+            
+        }
+    }
     connectedCallback(){ 
         this.formSize = this.screenSize(FORM_FACTOR);
         this.loaded = true;     
     }
 
     screenSize = (screen) => {
+        this.deviceType = screen === 'Large'? 'Desktop' : 'Mobile'
         return screen === 'Large'? true : false  
     }
    
@@ -73,6 +88,10 @@ export default class PriceCheck extends LightningElement {
     //       },
     //     });
     //   }
+
+
+    // ADD THIS BACK IN TO SAVE SEARCH TERM 
+
 
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
@@ -125,6 +144,8 @@ export default class PriceCheck extends LightningElement {
             fields[TERM.fieldApiName] = this.searchTerm; 
             fields[SUC.fieldApiName] = this.success;
             fields[COUNT.fieldApiName] = this.recFound;
+            fields[RECTYPE.fieldApiName] = this.queryRecordType; 
+            fields[DEV.fieldApiName] = this.deviceType; 
             const recordInput = {apiName: 'Query__c', fields:fields}
             createRecord(recordInput).then((record)=>{}).catch((e)=>{
                     let warn = JSON.stringify(e);
