@@ -6,7 +6,8 @@ const REGEX_COMMA = /(,)/g;
 const REGEX_24D = /2,4-D|2 4-d|2, 4-D/gi
 const REGEX_SLASH = /-/g; 
 const REGEX_FERT = /(\d{1,2}\s*-)(\s*\d{1,2}\s*-)(\s*\d{1,2})/g; 
-const REGEX_NOWHITESPACE = /\s/g
+const REGEX_NOWHITESPACE = /\s/g;
+const REGEX_WAREHOUSE = /wh\s*\d\d\d/gi;
 import {spellCheck, cpqSearchString, uniqVals} from 'c/tagHelper';
 export default class TagContainer extends LightningElement {
     @track tagCards = [];
@@ -17,6 +18,7 @@ export default class TagContainer extends LightningElement {
     priceBook = '01s410000077vSKAAY'; 
     searchSize;
     isFert;  
+    whSearch; 
     connectedCallback(){ 
         this.formSize = this.screenSize(FORM_FACTOR);
         this.loaded = true;     
@@ -54,20 +56,28 @@ export default class TagContainer extends LightningElement {
             this.isFert = !this.isFert ? '' : this.isFert[0].replace(REGEX_NOWHITESPACE, '').replace(REGEX_SLASH,'\-'); 
             //grab non fertilizer search inputs. 2,4-D is a common product the ',' causes issues. Remove Fertilizer, Escape Hyphen,  Commas  add the 'and' to filter ie car , red  query would be car and red
             //remove stock status that is in the where clause of nested soql. Trim the search. 
-            this.searchTerm = searchInput.replace(REGEX_24D, '2 4-D').replace(REGEX_FERT,'').replace(REGEX_SLASH,'\-').replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES,'').split(' ').sort().join(' ').trim();
+            this.searchTerm = searchInput.replace(REGEX_24D, '2 4-D').replace(REGEX_FERT,'').replace(REGEX_SLASH,'\-').replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES,'').replace(REGEX_WAREHOUSE,'').split(' ').sort().join(' ').trim();
             //need to combine fert and searchTerm
             let finalSearch =  `\\"${this.isFert}\\" ${this.searchTerm}`
-
+            this.whSearch = searchInput.replace(REGEX_NOWHITESPACE, "").match(REGEX_WAREHOUSE);
+            let searchRacks;
+            let backUpQuery;
             if(this.stock){
-                this.stock = spellCheck(this.stock[0])
-                this.searchQuery = cpqSearchString(finalSearch, this.stock);   
-            }else{
-                this.searchQuery = cpqSearchString(finalSearch, this.stock); 
+                this.stock = spellCheck(this.stock[0])  
             }
+            //pass to a helper to build the search query, warehouse parse and stock status
+            let buildSearchInfo = cpqSearchString(this.searchTerm, this.stock, this.whSearch) 
+                this.searchQuery = buildSearchInfo.builtTerm;
+                searchRacks = buildSearchInfo.wareHouseSearch; 
+                backUpQuery = buildSearchInfo.backUpQuery
             console.log(`sending: `,this.searchQuery);
             
-            let data = await searchTag({searchKey: this.searchQuery}) 
-            let once = data.length> 1 ? await uniqVals(data) : data;
+            let data = await searchTag({searchKey: this.searchQuery, searchWareHouse:searchRacks, backUpSearch: backUpQuery}) 
+            //here we split up the returned wrapper. 
+            //access the tags object using data.tags and the warehouse search using data.wareHouseFound
+            let tags = data.tags != undefined ? data.tags : []
+            let backUpSearchUsed = data.backUpSearchUsed;
+            let once = tags.length> 1 ? await uniqVals(tags) : tags;
             this.searchSize = once.length; 
             this.tagCards = await once.map((item, index) =>({
                                 ...item, 
@@ -85,14 +95,18 @@ export default class TagContainer extends LightningElement {
                                 //qtyOnHand: item.Product__r.Total_Product_Items__c, 
                                 //css to set the pop up box on table
                                 //classV: index <= 1 ? 'topRow' : 'innerInfo',
-                                //progScore: item?.W_Program_Score__c ?? 'not set',
+                                //progScore: item?.W_Program_Score__c ?? 'not set',getPickListValues
                                 //profit: item?.W_Product_Profitability__c,
                                 //invScore: item?.W_Inventory_Score__c ?? 'not set',
                                 //fp: item?.W_Focus_Product__c ?? 0,
                                 //searchIndex: index + 1
                                 
             }))
-           
+            //show no inventory found
+            if(backUpSearchUsed){
+                let  DIDNT_FIND_AT_WAREHOUSE = [{Id:'1343', name:`Not yet tagged for ${this.whSearch}, confirm Inventory after Selection`}]
+                this.tagCards =  [...DIDNT_FIND_AT_WAREHOUSE, ...this.tagCards] 
+            }
             this.loaded = true;
             this.error = undefined;
             // searchTag({ searchKey: this.searchTerm})
