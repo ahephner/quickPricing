@@ -3,8 +3,8 @@ import { createRecord } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import checkPrice from '@salesforce/apex/quickPriceSearch.vgGetPricing';
 import getPriceBooks from '@salesforce/apex/quickPriceSearch.vgPriceBooks'
-import wareHouses from '@salesforce/apex/quickPriceSearch.getWarehouse';
-import inCounts from '@salesforce/apex/quickPriceSearch.inCounts';
+import wareHouses from '@salesforce/apex/quickPriceSearch.getVGWarehouse';
+import inCounts from '@salesforce/apex/quickPriceSearch.inVGCounts';
 import queryType from '@salesforce/apex/lwcHelper.getRecordTypeId'; 
 import {newInventory,allInventory, roundNum} from 'c/helper' 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -90,7 +90,7 @@ export default class VgPriceCheck extends LightningElement {
         let enterKey = evt.keyCode === 13;
         if(enterKey && !this.noSearch){
             this.searchTerm = evt.target.value;
-            this.handleSearch2();
+            this.handleSearch();
         }
     }
     // navigateToRelatedList(item) {
@@ -137,9 +137,10 @@ export default class VgPriceCheck extends LightningElement {
         }).then(()=>{
             let name;
                 let cost; 
-                let flr;
-                let lev1;
-                let lev2;
+                let unitPrice;
+                let standardMargin; 
+                let aPrice;
+                let bPrice;
                 let slug; 
                 let stock;
                 let allStock;
@@ -148,15 +149,16 @@ export default class VgPriceCheck extends LightningElement {
                 let showPricing
                 let displayPrice;
                 let displayMargin; 
-                this.prod = this.temp.map(x=>{
+                this.prod = this.standardGroup.map(x=>{
                     name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
-                    flr = x.Floor_Price__c,
-                    lev1 = x.aPrice,
-                    lev2 = x.bPrice,
-                    slug = x.Agency_Product__c ? `Agency - $${flr}`:`cost $${cost}  flr $${flr}-${x.Floor_Margin__c}%   Level 1 $${lev1}`
+                    unitPrice = x.UnitPrice,
+                    standardMargin = roundNum(((x.UnitPrice - x.Product_Cost__c)/x.UnitPrice)*100, 2),
+                    aPrice = x.aPrice,
+                    bPrice = x.bPrice,
+                    slug = x.Agency_Product__c ? `Agency - $${unitPrice}`:`cost $${cost}  Standard $${unitPrice}-${standardMargin}%   A Pricebook $${aPrice}`
                     stock = x.Product2.Product_Status__c,
-                    allStock = x.Product2.Total_Product_Items__c
+                    //allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
                     //for navigation mixin
                     //url = x.Product2Id, 
@@ -164,15 +166,19 @@ export default class VgPriceCheck extends LightningElement {
                     //sandbox
                     //url = 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
-                    displayPrice = x.Level_2_UserView__c
-                    displayMargin = x.Level_2_Margin__c 
+                    displayPrice = x.bPrice
+                    displayMargin = roundNum(((bPrice - x.Product_Cost__c)/bPrice) *100,2)
 
-                    return {...x, name, cost, flr, lev1, lev2, slug, stock, allStock, ProductCode,url, showPricing, displayPrice, displayMargin}
+                    return {...x, name, cost, unitPrice, standardMargin, aPrice, bPrice, slug, stock, allStock, ProductCode,url, showPricing, displayPrice, displayMargin}
                 })
                 this.loaded = true; 
         })
     }
 
+    //standard group
+    standardGroup = [];
+    //non standard pricebooks
+    nonStandard = [];
     handleSearch(){
         this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value
         if(this.searchTerm.length<3){
@@ -182,13 +188,21 @@ export default class VgPriceCheck extends LightningElement {
         this.loaded = false
         checkPrice({priceBookIds: this.pricebookId, searchKey: this.searchTerm})
         .then((res)=>{
-                this.success = res.length > 0 ? true : false; 
-                this.recFound = res.length; 
+            this.temp = [...res]
+                this.success = this.temp.length > 0 ? true : false; 
+                this.recFound = this.temp.length; 
+               this.standardGroup = this.temp.filter(x=>x.Pricebook2.Name.includes('Standard'))
+               this.nonStandard = this.temp.filter(x=>!x.Pricebook2.Name.includes('Standard'))
+            //    console.log(res)
+            //    console.log(this.standardGroup)
+            //    console.log(this.nonStandard)
+        }).then(()=>{
                 let name;
                 let cost; 
-                let flr;
-                let lev1;
-                let lev2;
+                let standardMargin;
+                let standardPrice;  
+                let aPrice;
+                let bPrice;
                 let slug; 
                 let stock;
                 let allStock;
@@ -197,13 +211,14 @@ export default class VgPriceCheck extends LightningElement {
                 let showPricing
                 let displayPrice;
                 let displayMargin; 
-                this.prod = res.map(x=>{
-                    name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
+                this.prod = this.standardGroup.map(x=>{
+                    name= x.Product2.Name,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
-                    flr = x.Floor_Price__c,
-                    lev1 = x.Level_1_UserView__c,
-                    lev2 = x.Level_2_UserView__c,
-                    slug = x.Agency_Product__c ? `Agency - $${flr}`:`cost $${cost}  flr $${flr}-${x.Floor_Margin__c}%   Level 1 $${lev1}`
+                    standardPrice = x.UnitPrice,
+                    standardMargin = roundNum(((x.UnitPrice - x.Product_Cost__c)/x.UnitPrice)*100, 2),
+                    aPrice = this.nonStandard.find(y=>y.Product2Id === x.Product2Id && y.Pricebook2.Name.includes('Level A')).UnitPrice,
+                    bPrice = this.nonStandard.find(y=>y.Product2Id === x.Product2Id && y.Pricebook2.Name.includes('Level B')).UnitPrice,
+                    slug = x.Agency_Product__c ? `Agency - $${x.UnitPrice}`:`cost $${x.Product_Cost__c}  Standard Price$${x.UnitPrice}   Price Book A $${aPrice}`
                     stock = x.Product2.Product_Status__c,
                     allStock = x.Product2.Total_Product_Items__c
                     ProductCode = x.Product2.ProductCode,
@@ -213,10 +228,10 @@ export default class VgPriceCheck extends LightningElement {
                     //sandbox
                     //url = 'https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Product2/'+x.Product2Id+'/related/ProductItems/view'
                     showPricing = false; 
-                    displayPrice = x.Level_2_UserView__c
-                    displayMargin = x.Level_2_Margin__c 
+                    displayPrice = bPrice
+                    displayMargin = roundNum(((bPrice - x.Product_Cost__c)/bPrice) *100,2)
 
-                    return {...x, name, cost, flr, lev1, lev2, slug, stock, allStock, ProductCode,url, showPricing, displayPrice, displayMargin}
+                    return {...x, name, cost, standardPrice, standardMargin, aPrice, bPrice, slug, stock, allStock, ProductCode,url, showPricing, displayPrice, displayMargin}
                 })
 
         }).then(()=>{

@@ -56,8 +56,18 @@ public class test_quickPriceSearch {
         
         insert warehouse; 
         
+        //VG Warehouse
+        Schema.Location vgwarehouse = new Schema.Location();
+        vgwarehouse.Name= 'VG Warehouse';
+        vgwarehouse.Location_Number__c ='VG1';
+        vgwarehouse.IsInventoryLocation = true; 
+        vgwarehouse.LocationType = 'VG'; 
+        
+        insert vgwarehouse;
+        
         Test.startTest();
         	list<Schema.Location> stores = quickPriceSearch.getWareHouse(); 
+        list<Schema.Location> vgstores = quickPriceSearch.getVGWarehouse();
         Test.stopTest();
         system.assertEquals(1, stores.size());  
     }
@@ -73,6 +83,8 @@ public class test_quickPriceSearch {
         insert cust;
         //product creation
         Id pricebookId = Test.getStandardPricebookId();
+        pricebook2 vgPriceBook = new priceBook2(Name = 'VG Price Book', isActive = True, Valley_Green__c = true);
+        insert vgPriceBook; 
         
         //create product2 that is active
         product2 prod = new product2(name ='product', IsActive= True, ProductCode='alex'); 
@@ -126,10 +138,11 @@ public class test_quickPriceSearch {
         pc.Add(widget.ProductCode);
         OpportunityLineItem oneLine = cpqApex.getLastQuote(cust.ID, 'alex', opp2.id);
         list<OpportunityLineItem> multiple = cpqApex.onLoadGetLastQuoted(cust.Id, pc, opp2.id);
+        list<Pricebook2> vgPb = quickPriceSearch.vgPriceBooks();
     Test.stopTest();
-        system.debug('pc => '+li.ProductCode);
+        
         list<opportunity> pop = [select id, name from opportunity where AccountId =: cust.id]; 
-        system.debug('pop '+pop); 
+        
     }
     
     @isTest
@@ -143,11 +156,20 @@ public class test_quickPriceSearch {
         Schema.Location warehouse = new Schema.Location(Name='Warehouse', LocationType='Warehouse', IsInventoryLocation=True);
         insert warehouse;
         
+        Schema.Location vgwarehouse = new Schema.Location(Name='VG Warehouse', LocationType='Warehouse', IsInventoryLocation=True);
+        insert vgwarehouse;
+        
         ProductItem inven1 = new ProductItem(Product2Id= widget.id,LocationId =warehouse.id, QuantityOnHand=1);
         insert inven1;
         
         ProductItem inven2 = new ProductItem(Product2Id= widget2.id,LocationId =warehouse.id, QuantityOnHand=2);
         insert inven2;
+        
+        ProductItem vginven1 = new ProductItem(Product2Id= widget.id,LocationId = vgwarehouse.id, QuantityOnHand=1);
+        insert vginven1;
+        
+        ProductItem vginven2 = new ProductItem(Product2Id= widget2.id,LocationId = vgwarehouse.id, QuantityOnHand=2);
+        insert vginven2;
         string pc1 = '123';
         string pc2 = '456';
         list<string> pcList = new list<string>();
@@ -160,7 +182,33 @@ public class test_quickPriceSearch {
         	idList.add(widget2.Id);
         	list<productitem> changeInventory = quickPriceSearch.inCounts(pcList, warehouse.id); 
         	list<productitem> changeInventoryAll = quickPriceSearch.inCounts(pcList, 'All'); 
+        	
+        	list<productitem> vgInventory = quickPriceSearch.inVGCounts(pcList, vgwarehouse.id);
+        	list<productitem> vgInventoryAll = quickPriceSearch.inVGCounts(pcList, 'All');
         Test.stopTest();
     }
-
+@isTest
+    static void test_vgSearch(){
+        pricebook2 vgPriceBook = new priceBook2(Name = 'VG Price Book', isActive = True, Valley_Green__c = true);
+        insert vgPriceBook; 
+        
+        product2 widget = new product2(name ='widget', IsActive= True, ProductCode='alex', Valley_Green__c = True); 
+        insert widget; 
+        
+        PricebookEntry widgetpbe = new PricebookEntry(Pricebook2Id = vgPriceBook.Id, Product2Id=widget.id,
+                                                 unitprice=4, IsActive = True, UseStandardPrice=False);
+        
+        product2 widget2 = new product2(name ='widget2', IsActive= True, ProductCode='abby', Valley_Green__c = True); 
+        insert widget2; 
+        
+        PricebookEntry widgetpbe2 = new PricebookEntry(Pricebook2Id = vgPriceBook.Id, Product2Id=widget2.id,
+                                                 unitprice=4, IsActive = True, UseStandardPrice=False);
+        test.startTest();
+        	list<string> pricebooks = new list<string>();
+        	pricebooks.add(vgPriceBook.Id);
+        	string searchT = 'widget';
+        	list<PricebookEntry> back = quickPriceSearch.vgGetPricing(pricebooks, searchT);
+        test.stopTest();
+        
+    }
 }

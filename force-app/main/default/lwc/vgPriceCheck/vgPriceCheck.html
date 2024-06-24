@@ -1,6 +1,9 @@
 <template>
     <div class="main">
         <div class="slds-grid slds-wrap">
+            <template if:true={noSearch}>
+                <p class="slds-align_absolute-center loadMessage">Loading price books..on second!</p>
+            </template>
             <template if:false={showInventory}>
                 <template if:true={formSize}>
                     <div class="slds-col slds-size_10-of-12">
@@ -15,7 +18,7 @@
                     </div>
                     <div class="slds-col slds-size_1-of-12 slds-m-top_large searchBtn">
                         <lightning-button variant="brand" label="Search" 
-                        title="search" onclick={handleSearch2} disabled={noSearch}></lightning-button>
+                        title="search" onclick={handleSearch} disabled={noSearch}></lightning-button>
                     </div>
             
                 </template>
@@ -71,11 +74,11 @@
                                     {y.name}
                                 </a>
                             </div>
-                            <div class="slds-col slds-size-1-of-4 ">
+                            <!-- <div class="slds-col slds-size-1-of-4 ">
                                 <span class="stockStatus">
                                     Status: <b>{y.stock}</b>
                                 </span>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="slds-grid slds-m-left_x-small">
                             <p>{y.slug} </p>
@@ -114,7 +117,8 @@
                         </template>
                         <template if:true={showInventory}>
                             <div class="slds-col slds-m-left_x-small slds-m-top_small">
-                                <p>All Company QTY: {y.allStock} - Qty Avail.: {y.wInv}</p>
+                                <!--IF WE GET TOTAL ITEMS ADD ->  All Company QTY: {y.allStock} - -->
+                                <p> Qty Avail.: {y.wInv}</p>
                             </div>
                         </template>
                             <template if:false={y.showPricing}>
@@ -147,11 +151,11 @@
                                         {x.name}
                                     </a>
                                 </div>
-                                <div class="slds-col slds-size-1-of-4 ">
+                                <!-- <div class="slds-col slds-size-1-of-4 ">
                                     <span class="stockStatus">
                                         Status: <b>{x.stock}</b>
                                     </span>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="slds-grid slds-m-left_x-small">
                                 <p>{x.slug} </p>
@@ -194,7 +198,8 @@
                             </template>
                             <template if:true={showInventory}>
                                 <div class="slds-col slds-m-left_x-small slds-m-top_small">
-                                    <p>All Company QTY: {x.allStock} - Qty Avail.: {x.wInv}</p>
+                                    <!--IF WE GET TOTAL ITEMS ADD ->  All Company QTY: {y.allStock} - -->
+                                    <p>Qty Avail.: {x.wInv}</p>
                                 </div>
                             </template>
                             </div>
