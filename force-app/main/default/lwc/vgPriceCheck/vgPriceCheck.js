@@ -14,6 +14,7 @@ import SUC from '@salesforce/schema/Query__c.successful__c';
 import COUNT from '@salesforce/schema/Query__c.Records_Returned__c';
 import RECTYPE from '@salesforce/schema/Query__c.RecordTypeId';
 import DEV from  '@salesforce/schema/Query__c.Device_Type__c';
+import VG_USER from '@salesforce/schema/Query__c.Valley_Green__c';
 
 export default class VgPriceCheck extends LightningElement {
     searchTerm;
@@ -241,6 +242,7 @@ export default class VgPriceCheck extends LightningElement {
             fields[COUNT.fieldApiName] = this.recFound;
             fields[RECTYPE.fieldApiName] = this.queryRecordType; 
             fields[DEV.fieldApiName] = this.deviceType; 
+            fields[VG_USER.fieldApiName] = true; 
             const recordInput = {apiName: 'Query__c', fields:fields}
             createRecord(recordInput).then((record)=>{}).catch((e)=>{
                     let warn = JSON.stringify(e);
