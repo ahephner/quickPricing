@@ -51,6 +51,12 @@
         <lightning-input data-id="toggle" type="toggle" 
                         label={btnLabel} checked={showInventory} onchange={checkInv}
                         message-toggle-active="" message-toggle-inactive=""></lightning-input>
+        <span class="lineUP">
+            <lightning-helptext 
+            content="Hover to see RUP states"
+            ></lightning-helptext>
+            <p class="info">Hover this to see restricted states</p>
+        </span>
     </div>
         </div>
 <!-- END OF SEARCH GROUPS -->
@@ -143,9 +149,12 @@
                            <!-- Top Line -->
                             <div class="slds-grid">
                                 <div class="slds-col slds-size_3-of-4 slds-m-left_x-small">
-                                    <a href={x.url} target='_blank' class="searchLinks">
+                                    <a href={x.url} target='_blank' class={x.links}>
                                         {x.name}
                                     </a>
+                                    <template if:true={x.RUP}>
+                                        <lightning-helptext class="warningHelp" content={x.rupStates}></lightning-helptext>
+                                    </template>
                                 </div>
                                 <div class="slds-col slds-size-1-of-4 ">
                                     <span class="stockStatus">

@@ -9,6 +9,9 @@
     margin-top: 2px;
     
 }
+.loadMessage{
+    color: #E90802; 
+}
 .pinned{
     margin-bottom: 3px;
     border: 1px solid rgba(239, 137, 137, 0.877);
@@ -34,11 +37,6 @@
 }
 
 .searchLinks{
-    color:#0000EE;
-    font-size: 12px;
-}
-.warnLink{
-    color:#CC0000;
     font-size: 12px;
 }
 
@@ -53,9 +51,7 @@
 .salesPrice{
     display: inline-grid; 
 }
-.lineUP{
-    display: inline-flex;
-}
+
 .showWarn{
     color: rgb(153, 0, 0);
     text-align: center;
@@ -66,13 +62,4 @@
 .pinBtn{
     margin-left: 25%;
     margin-bottom: 1%;
-}
-
-.warningHelp{
-    margin-left: 5px;
-}
-
-.info{
-    margin-top: 3px;
-    color:#CC0000;
 }
