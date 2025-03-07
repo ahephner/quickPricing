@@ -213,7 +213,7 @@ export default class VgPriceCheck extends LightningElement {
                 let displayPrice;
                 let displayMargin; 
                 this.prod = this.standardGroup.map(x=>{
-                    name= x.Product2.Name,
+                    name= x.Product2.Name + ' - '+ x.Product2.ProductCode,
                     cost = x.Agency_Product__c ? 'Agency' : x.Product_Cost__c,
                     standardPrice = x.UnitPrice,
                     standardMargin = roundNum(((x.UnitPrice - x.Product_Cost__c)/x.UnitPrice)*100, 2),
@@ -412,7 +412,8 @@ export default class VgPriceCheck extends LightningElement {
                 this.pinnedCards[0].allStock = back?.allStock ?? 'not found'; 
                 this.pinnedCards[0].wInv = back?.wInv ?? 'not found'; 
             }
-             
+            let sort = this.prod.sort((a, b) => b.wInv - a.wInv);
+            this.prod = [...sort]
             
             //console.log(JSON.stringify(this.prod)); 
         }catch(error){
