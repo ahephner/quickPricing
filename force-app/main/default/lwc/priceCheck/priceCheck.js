@@ -15,7 +15,7 @@ import RECTYPE from '@salesforce/schema/Query__c.RecordTypeId';
 import DEV from '@salesforce/schema/Query__c.Device_Type__c';
 
 // Import helper functions and regular expressions
-import { spellCheck, cpqSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
+import { spellCheck, cpqSearchString, uniqVals, addSingleKey, cpqSearchStringFert } from 'c/tagHelper';
 import { mergePricing } from 'c/internHelper';
 import { reNameKey } from 'c/helper'; 
 import searchTag from '@salesforce/apex/quickPriceSearchTag.cpqSearchTag';
@@ -26,13 +26,14 @@ const REGEX_COMMA = /(,)/g;
 const REGEX_24D = /2,4-D|2 4-d|2, 4-D/gi;
 const REGEX_WAREHOUSE = /wh\s*\d\d\d/gi;
 const REGEX_WHITESPACE = /\s/g;
-
+const REGEX_FERT =  /(\d{1,2}\s*-)(\s*\d{1,2}\s*-)(\s*\d{1,2})/g
 export default class PriceCheck extends LightningElement {
     // my variables
     searchTerm;
     searchQuery;
     whSearch;
     stock;
+    fertSearch; 
     // end of my variables
     priceBook = '01s410000077vSKAAY';
     loaded;
@@ -115,10 +116,11 @@ async advancedSearch() {
 
     this.whSearch = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().replace(REGEX_WHITESPACE, "").match(REGEX_WAREHOUSE);
     this.stock = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().match(REGEX_STOCK_RES);
-    this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value.toLowerCase().replace(REGEX_24D, '2 4-D')
-        .replace(REGEX_COMMA, ' and ').replace(REGEX_SOSL_RESERVED, '?').replace(REGEX_STOCK_RES, '').replace(REGEX_WAREHOUSE, '').trim();
+    this.fertSearch = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().match(REGEX_FERT);
+    this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value.toLowerCase().replace(REGEX_24D, '2 4-D').replace(REGEX_SOSL_RESERVED, '?')
+    .replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES, '').replace(REGEX_WAREHOUSE, '').replace(REGEX_FERT, '').trim();
 
-    if (this.searchTerm.length < 2) {
+    if (this.searchTerm.length < 2 && this.fertSearch ===null) {
         // LIGHTNING ALERT HERE
         return;
     }
@@ -133,7 +135,7 @@ async advancedSearch() {
 
     }
 
-    let buildSearchInfo = cpqSearchString(this.searchTerm, this.stock, this.whSearch);
+    let buildSearchInfo = this.fertSearch === null ? cpqSearchString(this.searchTerm, this.stock, this.whSearch) : cpqSearchStringFert(this.searchTerm, this.stock, this.whSearch, this.fertSearch);
     this.searchQuery = buildSearchInfo.builtTerm;
     searchRacks = buildSearchInfo.wareHouseSearch;
     backUpQuery = buildSearchInfo.backUpQuery;
@@ -158,7 +160,7 @@ async advancedSearch() {
             const stockStatusA = (a.Stock_Status__c || '').toLowerCase();
             const stockStatusB = (b.Stock_Status__c || '').toLowerCase();
             
-            const isBottomStatus = status => ['none', 'unknown', ''].includes(status);
+            const isBottomStatus = status => ['vendor','none', 'unknown', ''].includes(status);
             
             if (isBottomStatus(stockStatusA) && !isBottomStatus(stockStatusB)) return 1;
             if (!isBottomStatus(stockStatusA) && isBottomStatus(stockStatusB)) return -1;
