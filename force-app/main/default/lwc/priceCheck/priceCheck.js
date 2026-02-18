@@ -21,7 +21,7 @@ import { reNameKey } from 'c/helper';
 import searchTag from '@salesforce/apex/quickPriceSearchTag.cpqSearchTag';
 
 const REGEX_SOSL_RESERVED = /(\?|&|\||!|\{|\}|\[|\]|\(|\)|\^|~|\*|:|"|\+|\\)/g;
-const REGEX_STOCK_RES = /(stock|sock|limited|limted|lmited|limit|close-out|close out|closeout|close  out|exempt|exmpet|exemept|southern stock|southernstock|southner stock)/g;
+const REGEX_STOCK_RES = /(stock|sock|limited|limted|lmited|limit|close-out|close out|closeout|close  out|exempt|exmpet|exemept|southern stock|southernstock|southner stock|northeast|north east|midwest|mid west)/g;
 const REGEX_COMMA = /(,)/g;
 const REGEX_24D = /2,4-D|2 4-d|2, 4-D/gi;
 const REGEX_WAREHOUSE = /wh\s*\d\d\d/gi;
@@ -153,31 +153,44 @@ async advancedSearch() {
         let pricing = data.pricing; 
         console.log('PRICING: ', pricing)
         let once = tags.length > 1 ? await uniqVals(tags) : tags;
-        console.log("ONCE: ", once);
+        
         this.searchSize = once.length;
+        const statusOrder = {
+            "stock": 1,
+            "exempt": 2,
+            "limited": 3,
+            'northeast': 4,
+            "non-stock": 5,
+            "close-out":6,
+            "vendor": 7,
+            "none": 8,
+            "unknown": 9,
+            '': 10
+        };
         once.sort((a, b) => {
 
             const stockStatusA = (a.Stock_Status__c || '').toLowerCase();
             const stockStatusB = (b.Stock_Status__c || '').toLowerCase();
+            return (statusOrder[stockStatusA] || 999) - (statusOrder[stockStatusB] || 999);
+            // const isBottomStatus = status => ['vendor','none', 'unknown', ''].includes(status);
             
-            const isBottomStatus = status => ['vendor','none', 'unknown', ''].includes(status);
+            // if (isBottomStatus(stockStatusA) && !isBottomStatus(stockStatusB)) return 1;
+            // if (!isBottomStatus(stockStatusA) && isBottomStatus(stockStatusB)) return -1;
             
-            if (isBottomStatus(stockStatusA) && !isBottomStatus(stockStatusB)) return 1;
-            if (!isBottomStatus(stockStatusA) && isBottomStatus(stockStatusB)) return -1;
+            // if (stockStatusA !== stockStatusB) {
+            //     return stockStatusB.localeCompare(stockStatusA);
+            // }
             
-            if (stockStatusA !== stockStatusB) {
-                return stockStatusB.localeCompare(stockStatusA);
-            }
+            // const scoreA = a.ATS_Score__c || 0;
+            // const scoreB = b.ATS_Score__c || 0;
             
-            const scoreA = a.ATS_Score__c || 0;
-            const scoreB = b.ATS_Score__c || 0;
+            // if (scoreA !== scoreB) {
+            //     return scoreB - scoreA;
+            // }
             
-            if (scoreA !== scoreB) {
-                return scoreB - scoreA;
-            }
-            
-            return (a.Product_Code__c || '').localeCompare(b.Product_Code__c || '');
+            //return (a.Product_Code__c || '').localeCompare(b.Product_Code__c || '');
         });    
+        console.log("ONCE: ", once);
         //join the sorted products with pricing 
         let final = mergePricing(once, 'Product__c', pricing, 'Product2Id', 'Level_1_UserView__c');
         final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Floor_Margin__c');
@@ -196,7 +209,7 @@ async advancedSearch() {
             lev2: item.Level_2_UserView__c || 'N/A',
             slug: item.Product__r?.Agency_Pricing__c 
                 ? `Agency - $${item.Floor_Price__c || 'N/A'}` 
-                : `cost $${item.Product_Cost__c || 'N/A'}  flr $${item.Floor_Price__c || 'N/A'}-${item.Floor_Margin__c || 'N/A'}%   Level 1 $${item.Level_1_UserView__c || 'N/A'}`,
+                : `cost $${item.Product_Cost__c || 'N/A'}  flr $${item.Floor_Price__c || 'N/A'}-${item.Floor_Margin__c || 'N/A'}% `,
             stock: item.Stock_Status__c || 'None',
             allStock: item.Product__r?.Total_Product_Items__c || 'N/A',
             ProductCode: item.Product_Code__c || 'N/A',

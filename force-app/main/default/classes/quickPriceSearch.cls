@@ -38,11 +38,11 @@ public class quickPriceSearch {
         if(locId == 'All'){
             
             counts = [select Total_Product_Items__c, Product_Code__c,Quantity_Available__c from
-                                    ProductItem where Product_Class__c = 'Simple' and Product_Code__c In :(pc)];
+                                    ProductItem where Product_Code__c In :(pc)];
             
         }else{
             counts = [select QuantityOnHand, Product_Code__c, Quantity_Available__c from
-                             ProductItem where Product_Class__c = 'Simple' and LocationId =: locId 
+                             ProductItem where LocationId =: locId 
                              and Product_Code__c In :(pc)];
         
         }

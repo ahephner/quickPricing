@@ -65,17 +65,18 @@ const quickSearchString = (term, stock)=>{
   const cpqSearchStringFert = (term, stock, wh, fert) =>{
     let status = 'Active'
     let fertCategory = 'Fertilizer'; 
+    let foliar = 'Foliar-Pak'
     let warehouseSearchCode = wh != null ? wh[0] : '';
     let fertSe = fert != null ? fert[0] : ''
     let input = wh != null ? `${term} ${wh}`: term; 
     input = fertSe != null ? `${fertSe} ${input}` : input
-    input = input.replaceAll('-', '\\-')
+    input = input.replaceAll("-", "\\-").trim();
     let wareHouseSearch = wh != null ? true :false; 
     //let searchString = 'FIND \''+input+'\' IN ALL FIELDS RETURNING Tag__c(id, Tag_Description__c, Search_Slug_2__c, '
-    let searchString = 'FIND {'+input+'} IN ALL FIELDS RETURNING Tag__c(id, Tag_Description__c, Search_Slug_2__c, '
+    let searchString = 'FIND {"' + input + '*"} IN ALL FIELDS RETURNING Tag__c(id, Tag_Description__c, Search_Slug_2__c, '
     +'Product__c, Product_Name__c, Product__r.Temp_Unavailable__c,Product__r.Temp_Mess__c, ATS_Score__c, Stock_Status__c, '
     +'W_Focus_Product__c, W_Product_Profitability__c, W_Program_Score__c, W_Inventory_Score__c, Product__r.ERP_Name__c,'
-    +'Floor_Price__c, Product__r.Total_Product_Items__c,Product__r.Floor_Type__c, Product__r.RUP__c, Product_Code__c, Product__r.Restricted_States__c where product__r.IsActive = true and Product__r.Primary_Category__c = \''+fertCategory+'\'' //and Tag_Status__c = \''+ status+'\''
+    +'Floor_Price__c, Product__r.Total_Product_Items__c,Product__r.Floor_Type__c, Product__r.RUP__c, Product_Code__c, Product__r.Restricted_States__c where product__r.IsActive = true and (Product__r.Primary_Category__c = \''+fertCategory+'\'or Product__r.Primary_Category__c = \''+foliar+'\')' //and Tag_Status__c = \''+ status+'\''
   
     //previous before order by status then score
     stock != null ? searchString += ' and Stock_Status__c  = \''+stock+'\' order by Stock_Status__c desc nulls last)' : searchString += ' order by Stock_Status__c desc nulls last)'; 
